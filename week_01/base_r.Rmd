@@ -24,11 +24,19 @@ If a vector is one-dimensional, then we can either:
 - Pass a logical test that will print values
   - `v == 2` Tests for each value in that vector taking a particular tested, in this case, 2. 
 
+```{r}
+v==2 
+```
+
+
 And so, 
 
 - `v[v == 2]` Will print only the values that meet the test.
 - `v[v == 6]` Will not print anything
 - `v[v %in% 1:3]` uses the set-based `%in%` operator which looks for existence in a range.  
+```{r}
+v[v %in% 1:10]
+```
 
 `data.frames` are just collections of vectors.
 
@@ -44,6 +52,10 @@ df <- data.frame(
   type=rep(LETTERS[1:5], each=4) 
   )
 df
+```
+
+```{r}
+df$type[4]
 ```
 
 We can reference any of the vectors that are stored in the data frame by `stringing` into that object using the `$` operator and then naming the vector that we're interested in. Note that by calling the stored data.frame object we're scoping from the global namespace into the namespace for that object, and then calling for the named vector. We *could* also pull this based on location -- though this brings on considerable risk: If the data structure should change in the future, you'll pull from a position that might have different information than you think it does. 
@@ -79,25 +91,25 @@ Some light practice
 - How would you write a call for the first 10 ids, pulling all of the columns? (The answers for each of these will follow in a short block)
 
 ```{r}
-
+df$id[1:10]
 ```
 
 - How would you pull all of the odd ids? 
 
 ```{r}
-
+df$id[df$id %% 2 != 0]
 ```
 
 - How would you pull all of the odd ids, that are of type indicated by a vowel? (Hint: You can combine the statements with the logical operator `&` )
 
 ```{r}
-
+df$id[df$id %% 2 != 0 & df$type %in% c('A', 'E', 'I', 'O', 'U')]
 ```
 
 - How would you pull the rows that *either* have an id that is in the set `1:2` **OR** have a type that is equal to `E`? (Hint: You can combine the statements ith the logical operator `|` which reads as inclusive OR)
 
 ```{r}
-
+df[df$id ==1 | df$id ==2 | df$type == "E"]
 ```
 
 Here come the answers: 
