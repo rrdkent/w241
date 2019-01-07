@@ -17,8 +17,12 @@ In what remains, I'll include a little write-up about data.table, which is proba
 - [data camp](https://www.datacamp.com/courses/data-table-data-manipulation-r-tutorial)
 
 ```{r} 
+install.packages("data.table", dependencies=TRUE)
 library(data.table) 
 ``` 
+```{r}
+library(data.table) 
+```
 
 As it is clear I'm pushing, I think that the `data.table` package is worth one's while to learn while honing skills with data wrangling. Here's why: 
 
