@@ -28,7 +28,9 @@ In the upper right of this editor, you can see the **Insert** button. This has o
 Go ahead an insert a chunk below, and include a call for a "Hello World String". 
 
 <!-- Insert Chunk Below Here -->
-
+```{r}
+"Hello World string"
+```
 
 
 Note that you don't have to call for a print call surrounding a character string. The default behavior is going to be a print statement if you aren't assigning the results into an object. 
