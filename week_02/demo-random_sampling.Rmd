@@ -8,8 +8,13 @@ Consider the following, vector, `population` which is arranged from lowest to hi
 
 ```{r}
 population <- rnorm(n = 1000, mean = 10, sd = 5)
-population <- sort(population)
 ```
+
+```{r}
+population <- sort(population)
+population
+```
+
 
 In this vector, we've places 1,000 draws from a gaussian distribution with a mean of 10 and a standard deviation of 5. In this case, we can know that the population *parameter* **mean** is just:
 
@@ -29,6 +34,9 @@ What if, for some reason, we couldn't actually observe all of the values in the 
 ```{r}
 sum(population[1:10])
 ```
+```{r}
+sum(population[1:10])/10
+```
 
 
 2. The choice to sum those values seems pretty illogical, right? What if, instead, we were to take the average of them. Would this estimator produce an estimate of the population parameter we're looking for that is any less biased? 
@@ -42,16 +50,37 @@ Not really. Although there is a more natural relationship between the function w
 And so, this estimator is going to  remain a **biased estimator** for any sample size that is smaller than the whole population. 
 
 Interestingly, however, as the size of the sample gets larger, the estimate that the estimator produces gets closer to the truth. When this is the case, we say that the estimator is **consistent.** Although it might be biased in any finite sample, it produces a consistent estimate in an infinate sample. 
+```{r}
+install.packages("kableExtra")
+```
+
+```{r}
+library(kableExtra)
+```
+
 
 ```{r}
 sample_1 <- mean(population[1:10])
 sample_2 <- mean(population[1:100])
 sample_3 <- mean(population[1:999])
 
-kable::kable()
+#kable::kable()
 ```
 
+```{r}
+sample_1
+```
+```{r}
+sample_2
+```
+```{r}
+sample_3
+```
+
+
 Woud you say that the first estimator we were using -- the sum of the sample -- was a consistent estimator? Why or why not? 
+
+No, I wouldn't say it would be a consistent estimator, because based upon different samples of a sorted list, it provides very different answers.
 
 # A natural estimator
 
@@ -78,6 +107,10 @@ If you pass a size argument, you'll pull a sample that is of that size. We can u
 
 ```{r}
 letter_population <- LETTERS[1:10]
+```
+
+```{r}
+letter_population
 ```
 
 Then we can pull the third letter using a positional index
@@ -107,4 +140,8 @@ sample_mean_3
 
 1. Are you surprisred that the values are not all the same? Why or why not? Are you surprised that the `sample_mean_2a` and `sample_mean_2b` are not exactly the same? Aren't they the same size? 
 
+No, I am not surprised, because as we increase the sample size and it becomes closer and closer to the population size, the sample mean should converge towards the true population m ean.  I'm not surprised (I think) about sample mean 2a and 2b, because that is a function of the randomness of the sample, even though they are the same size.
+
 2. As the size of the sample that you take gets larger, will the estimate that you calculate tend to get closer to the truth, farther from the truth, or stay the same distance from the truth? Why? 
+
+Closer to the truth, because it is a better approximation of the truth which is the mean of population size. (mu versus x-bar)
