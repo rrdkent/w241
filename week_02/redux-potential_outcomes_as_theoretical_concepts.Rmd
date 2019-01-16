@@ -24,13 +24,18 @@ Create a data.table with the following columns:
 2. A `tau` column that has random draws from the normal distribution. Set the mean of these draws to be two, and the standard deviation to also be two. 
 
 ```{r}
-library(data.table)
+library(data.table) 
+```
+
+
+
+```{r}
 
 NROWS <- 1000 
-
-d <- data.table(
+d <- data.table(id = 1:NROWS, tau = rnorm(1000, 2, 2)
 
 )
+d
 ```
 
 Let's build more into our data, like, that some of the people are tall, while others are short; and some are young, while others are old. 
