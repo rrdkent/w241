@@ -30,7 +30,7 @@ E[\hat{\tau}_{i} - \tau] = 0
 \end{equation}
 
 ## Is the mean an unbiased estimator of a population parameter? 
-Consider the following example: Your section instructor, wanting to choose his or her examples to fit in with the pop-culture references that *you* are most familiar with, wants to asses how old you are. But, the section instructor also is not so impolite as to ask you directly. How could they construct an estimate for your age? 
+Consider the following example: Your section instructor, wanting to choose his or her examples to fit in with the pop-culture references that *you* are most familiar with, wants to assess how old you are. But, the section instructor also is not so impolite as to ask you directly. How could they construct an estimate for your age? 
 
 ```{r}
 library(data.table)
@@ -45,6 +45,11 @@ class_population[ , you := sample(you)] # shuffle that indicator
 head(class_population)
 ```
 
+```{r}
+class_population
+```
+
+
 So, how old are *you*? 
 
 ```{r}
@@ -55,7 +60,8 @@ your_age
 How old are the other people in the class? Write the slice that will pull this. 
 
 ```{r}
-
+their_age <- class_population[you == 0, age]
+their_age
 ```
 
 Here is *one* way that I could make a guess about how old you are -- pick one person at random from the class, and them their age, and make that my guess for your age. 
@@ -85,6 +91,11 @@ Each persons contribution to the expectation operator is:
 ```{r}
 class_population[ , p_times_age := prob_sample * age]
 ```
+
+```{r}
+class_population
+```
+
 
 And so the expectation of this **estimator**, which comes from sampling one person from the classroom is: 
 
@@ -151,23 +162,33 @@ d <- data.table(
   )
 ```
 
+```{r}
+d[, y_0]
+```
+
+
 We can't *actually* see both the potential outcome to control and treatment for any **single** person. But, what if we can come up with an unbiased estimate for the potential outcomes to control for the seven villages? 
 
 Randomly sample 5 of the villages and take the average of their potential outcomes. How close does this come to the true mean of 15? 
 
 ```{r}
-control_mean <- '[replace with your code]'
+control_sample <- sample(d[,y_0],5)
+
+control_mean <- mean(control_sample)
+control_mean
 ```
 
 Randomly sample 2 village and take the average of their potential outcomes. How close does this come to the true mean of 20? 
 
 ```{r}
-treat_mean <- '[replace with your code]'
+treat_sample <- sample(d[,y_1],2)
+treat_mean <- mean(treat_sample)
+treat_mean
 ```
 
 Calculate the difference of these. How close does this come to the true treatment effect of 5? 
 ```{r}
-
+treat_mean-control_mean
 ```
 
 Note that because we've got pretty small sample sizes here -- 5 in control and 2 in treatment -- we might actually not get that close in any *particular* run of this experiment. But, across all the experiments that we *could* have conducted, we will be dead on.
