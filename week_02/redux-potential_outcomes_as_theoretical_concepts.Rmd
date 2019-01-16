@@ -49,15 +49,27 @@ Make two new colums, using the `:=` assignment operator in the data.table. We'll
 d[ , height := sample(c('tall','short'), size = .N, replace = TRUE)]
 ```
 
+```{r}
+d
+```
+
+```{r}
+d[ , age := sample(c('young','old'), size = .N, replace = TRUE)]
+```
+
+```{r}
+d
+```
+
 In just exactly the same way, we can also think of our units having levels of *potential outcomes to control*. That is, we can suppose that people have some level of the outcome in the case that they do not drink any coffee. For concreteness, suppose that the outcome is people's number of minutes of 241 coding they can accomplish, before they fall asleep. 
 
 There might (or might not) be a relationship between our non-experimentally assigned outcomes. In the example we're working with here, suppose that there is no relationship between height and minutes of coding; but that there is a positive relationship between age and minutes of coding. 
 
-This might be represented in our data in the following way: The mean number of minutes that someone can work is 10, plus, if they're old (ahem... seasoned, disciplined) they are able to work for an additional 5 minutes on avergae. But, also assume that there is some noise in this relationship. 
+This might be represented in our data in the following way: The mean number of minutes that someone can work is 10, plus, if they're old (ahem... seasoned, disciplined) they are able to work for an additional 5 minutes on average But, also assume that there is some noise in this relationship. 
 
 Create a column on the data called `y_0` that takes the following values. 
 
-- If the preson is young, it takes the value of 10. 
+- If the person is young, it takes the value of 10. 
 - If the person is old, it takes the value of 15. 
 - For both young and old people add in a little bit of *noise* a a draw from a random normal distribution with `mean=0` and `sd=1`. 
 
@@ -67,7 +79,10 @@ There are a couple of ways that you can do this. While you may be tempted to sub
 - Use an evaluation statement using the `I()` "as is" operator. 
 
 ```{r}
-d[ , y_0 := ]
+d[ , y_0 := if (age == "old"){10 + rnorm(1, 0, 1)} else{ 15 + rnorm(1,0,1)}]
+```
+```{r}
+d
 ```
 
 Notice that there is no relationship between height and potential outcomes to control; and also notice that the "noise" in the relationship is represented in the draw from the normal distribution with mean 0. 
