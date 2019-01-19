@@ -26,15 +26,21 @@ Some guidelines for submitting problem sets in this course:
 
 - Explain the notation $Y_{i}(1)$.
 
-
+**The notation above significes the potential outcome if the ith subject were treated.  As we break it down, Y signifies that it is an outcome, the i subscript refers to the ith subject, and one represents a binary indicator identifying treatment.**
 
 - Explain the notation $E[Y_{i}(1)|d_{i}=0]$.
+
+****
 
 - Explain the difference between the notation $E[Y_{i}(1)]$ and the notation $E[Y_{i}(1)|d_{i}=1]$.
 (Extra credit) 
 
+****
+
 - Explain the difference between the notation $E[Y_{i}(1)|d_{i}=1]$ and the notation 
 $E[Y_{i}(1)|D_{i}=1]$.  Use exercise 2.7 from FE to give a concrete example of the difference.
+
+****
 
 # 2. Potential Outcomes Practice
 Use the values in the following table to illustrate that $E[Y_{i}(1)] - E[Y_{i}(0)] = E[Y_{i}(1) - Y_{i}(0)]$.
