@@ -1,0 +1,517 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Problem Set \#1},
+            pdfauthor={Daniel Kent for w241 Experiments and Causality},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Problem Set \#1}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Daniel Kent for w241 Experiments and Causality}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{\begin{verbatim}
+oday
+\end{verbatim}}
+
+
+\begin{document}
+\maketitle
+
+\section{1. Potential Outcomes
+Notation}\label{potential-outcomes-notation}
+
+\begin{itemize}
+\item
+  Explain the notation \(Y_{i}(1)\).
+\item
+  Explain the notation \(E[Y_{i}(1)|d_{i}=0]\).
+\item
+  Explain the difference between the notation \(E[Y_{i}(1)]\) and the
+  notation \(E[Y_{i}(1)|d_{i}=1]\). (Extra credit)
+\item
+  Explain the difference between the notation \(E[Y_{i}(1)|d_{i}=1]\)
+  and the notation \(E[Y_{i}(1)|D_{i}=1]\). Use exercise 2.7 from FE to
+  give a concrete example of the difference.
+\end{itemize}
+
+\section{2. Potential Outcomes
+Practice}\label{potential-outcomes-practice}
+
+Use the values in the following table to illustrate that
+\(E[Y_{i}(1)] - E[Y_{i}(0)] = E[Y_{i}(1) - Y_{i}(0)]\).
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule
+\begin{minipage}[b]{0.20\columnwidth}\raggedright\strut
+\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedright\strut
+\(Y_{i}(0)\)\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedright\strut
+\(Y_{i}(1)\)\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedright\strut
+\(\tau_i\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 1\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+5\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+6\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+1\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 2\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+8\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+5\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 3\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+10\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+12\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+2\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 4\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+5\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+5\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 5\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+10\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+8\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+-2\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{3. Conditional Expectations}\label{conditional-expectations}
+
+Consider the following table:
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule
+\begin{minipage}[b]{0.20\columnwidth}\raggedright\strut
+\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedright\strut
+\(Y_{i}(0)\)\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedright\strut
+\(Y_{i}(1)\)\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedright\strut
+\(\tau_i\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 1\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+10\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+5\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 2\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 3\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+20\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+30\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+10\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 4\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+20\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+-5\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 5\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+10\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+20\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+10\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 6\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Individual 7\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+30\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\raggedright\strut
+Average\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+20\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
+5\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Use the values depicted in the table above to complete the table below.
+
+\newpage
+
+\begin{longtable}[]{@{}lllll@{}}
+\toprule
+\begin{minipage}[b]{0.19\columnwidth}\raggedright\strut
+\(Y_{i}(0)\)\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedright\strut
+20\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedright\strut
+30\strut
+\end{minipage} & \begin{minipage}[b]{0.32\columnwidth}\raggedright\strut
+Marginal \(Y_{i}(0)\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
+10\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.32\columnwidth}\raggedright\strut
+\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
+15\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.32\columnwidth}\raggedright\strut
+\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
+20\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+n: \%:\strut
+\end{minipage} & \begin{minipage}[t]{0.32\columnwidth}\raggedright\strut
+\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
+Marginal \(Y_{i}(1)\)\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
+\strut
+\end{minipage} & \begin{minipage}[t]{0.32\columnwidth}\raggedright\strut
+1.0\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Fill in the number of observations in each of the nine cells;
+\item
+  Indicate the percentage of all subjects that fall into each of the
+  nine cells.
+\item
+  At the bottom of the table, indicate the proportion of subjects
+  falling into each category of \(Y_{i}(1)\).
+\item
+  At the right of the table, indicate the proportion of subjects falling
+  into each category of \(Y_{i}(0)\).
+\item
+  Use the table to calculate the conditional expectation that
+  \(E[Y_{i}(0)|Y_{i}(1) > 15]\).
+\item
+  Use the table to calculate the conditional expectation that
+  \(E[Y_{i}(1)|Y_{i}(0) > 15]\).
+\end{enumerate}
+
+\section{4. More Practice with Potential
+Outcomes}\label{more-practice-with-potential-outcomes}
+
+Suppose we are interested in the hypothesis that children playing
+outside leads them to have better eyesight.
+
+Consider the following population of ten representative children whose
+visual acuity we can measure. (Visual acuity is the decimal version of
+the fraction given as output in standard eye exams. Someone with 20/20
+vision has acuity 1.0, while someone with 20/40 vision has acuity 0.5.
+Numbers greater than 1.0 are possible for people with better than
+``normal'' visual acuity.)
+
+\begin{longtable}[]{@{}rrr@{}}
+\toprule
+child & y0 & y1\tabularnewline
+\midrule
+\endhead
+1 & 1.1 & 1.1\tabularnewline
+2 & 0.1 & 0.6\tabularnewline
+3 & 0.5 & 0.5\tabularnewline
+4 & 0.9 & 0.9\tabularnewline
+5 & 1.6 & 0.7\tabularnewline
+6 & 2.0 & 2.0\tabularnewline
+7 & 1.2 & 1.2\tabularnewline
+8 & 0.7 & 0.7\tabularnewline
+9 & 1.0 & 1.0\tabularnewline
+10 & 1.1 & 1.1\tabularnewline
+\bottomrule
+\end{longtable}
+
+In the table, state \(Y_{i}(1)\) means ``playing outside an average of
+at least 10 hours per week from age 3 to age 6,'' and state \(Y_{i}(0)\)
+means ``playing outside an average of less than 10 hours per week from
+age 3 to age 6.'' \(Y_{i}\) represents visual acuity measured at age 6.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\item
+  Compute the individual treatment effect for each of the ten children.
+  Note that this is only possible because we are working with
+  hypothetical potential outcomes; we could never have this much
+  information with real-world data. (We encourage the use of computing
+  tools on all problems, but please describe your work so that we can
+  determine whether you are using the correct values.)
+\item
+  In a single paragraph, tell a story that could explain this
+  distribution of treatment effects.
+\item
+  What might cause some children to have different treatment effects
+  than others?
+\item
+  For this population, what is the true average treatment effect (ATE)
+  of playing outside.
+\item
+  Suppose we are able to do an experiment in which we can control the
+  amount of time that these children play outside for three years. We
+  happen to randomly assign the odd-numbered children to treatment and
+  the even-numbered children to control. What is the estimate of the ATE
+  you would reach under this assignment? (Again, please describe your
+  work.)
+\item
+  How different is the estimate from the truth? Intuitively, why is
+  there a difference?
+\item
+  We just considered one way (odd-even) an experiment might split the
+  children. How many different ways (every possible way) are there to
+  split the children into a treatment versus a control group (assuming
+  at least one person is always in the treatment group and at least one
+  person is always in the control group)?
+\item
+  Suppose that we decide it is too hard to control the behavior of the
+  children, so we do an observational study instead. Children 1-5 choose
+  to play an average of more than 10 hours per week from age 3 to age 6,
+  while Children 6-10 play less than 10 hours per week. Compute the
+  difference in means from the resulting observational data.
+\item
+  Compare your answer in (h) to the true ATE. Intuitively, what causes
+  the difference?
+\end{enumerate}
+
+\section{5. Randomization and
+Experiments}\label{randomization-and-experiments}
+
+Suppose that a reasearcher wants to investigate whether after-school
+math programs improve grades. The researcher randomly samples a group of
+students from an elementary school and then compare the grades between
+the group of students who are enrolled in an after-school math program
+to those who do not attend any such program. Is this an experiment or an
+observational study? Why?
+
+\section{6. Lotteries}\label{lotteries}
+
+A researcher wants to know how winning large sums of money in a national
+lottery affect people's views about the estate tax. The research
+interviews a random sample of adults and compares the attitudes of those
+who report winning more than \$10,000 in the lottery to those who claim
+to have won little or nothing. The researcher reasons that the lottery
+choose winners at random, and therefore the amount that people report
+having won is random.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Critically emvaluate this assumption.
+\item
+  Suppose the researcher were to restrict the sample to people who had
+  played the lottery at least once during the past year. Is it safe to
+  assume that the potential outcomes of those who report winning more
+  than \$10,000 are identical, in expectation, to those who report
+  winning little or nothing?
+\end{enumerate}
+
+\emph{Clarifications}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Please think of the outcome variable as an individual's answer to the
+  survey question ``Are you in favor of raising the estate tax rate in
+  the United States?''
+\item
+  The hint about potential outcomes could be rewritten as follows: Do
+  you think those who won the lottery would have had the same views
+  about the estate tax if they had actually not won it as those who
+  actually did not win it? (That is, is
+  \(E[Y_{i}0|D=1] = E[Y_{i}0|D=0]\), comparing what would have happened
+  to the actual winners, the \(|D=1\) part, if they had not won, the
+  \(Y_{i}(0)\) part, and what actually happened to those who did not
+  win, the \(Y_{i}(0)|D=0\) part.) In general, it is just another way of
+  asking, ``are those who win the lottery and those who have not won the
+  lottery comparable?''
+\item
+  Assume lottery winnings are always observed accurately and there are
+  no concerns about under- or over-reporting.
+\end{enumerate}
+
+\section{7. Inmates and Reading}\label{inmates-and-reading}
+
+A researcher studying 1,000 prison inmates noticed that prisoners who
+spend at least 3 hours per day reading are less likely to have violent
+encounters with prison staff. The researcher recommends that all
+prisoners be required to spend at least three hours reading each day.
+Let \(d_{i}\) be 0 when prisoners read less than three hours each day
+and 1 when they read more than three hours each day. Let \(Y_{i}(0)\) be
+each prisoner's PO of violent encounters with prison staff when reading
+less than three hours per day, and let \(Y_{i}(1)\) be their PO of
+violent encounters when reading more than three hours per day.
+
+In this study, nature has assigned a particular realization of \(d_{i}\)
+to each subject. When assessing this study, why might one be hesitant to
+assume that \({E[Y_{i}(0)|D_{i}=0] = E[Y_{i}(0)|D_{i}=1]}\) and
+\(E{[Y_{i}(1)|D_{i}=0] = E[Y_{i}(1)|D_{i}=1]}\)? In your answer, give
+some intuitive explanation in English for what the mathematical
+expressions mean.
+
+
+\end{document}
