@@ -381,28 +381,28 @@ Some guidelines for submitting problem sets in this course:
 <td><p>n:1 %:14</p></td>
 <td><p>n:1 %:14</p></td>
 <td><p>n:0 %:0</p></td>
-<td><p>%:29</p></td>
+<td><p>n:2 %:29</p></td>
 </tr>
 <tr class="even">
 <td><p>15</p></td>
 <td><p>n:2 %:29</p></td>
 <td><p>n:1 %:14</p></td>
 <td><p>n:1 %:14</p></td>
-<td><p>%:57</p></td>
+<td><p>n:4 %:57</p></td>
 </tr>
 <tr class="odd">
 <td><p>20</p></td>
 <td><p>n:1 %:14</p></td>
 <td><p>n:0 %:0</p></td>
 <td><p>n:1 %:14</p></td>
-<td><p>%:29</p></td>
+<td><p>n:2 %:29</p></td>
 </tr>
 <tr class="even">
 <td><p>Marginal <span class="math inline">\(Y_{i}(1)\)</span></p></td>
-<td><p>%:57</p></td>
-<td><p>%:29</p></td>
-<td><p>%:29</p></td>
-<td><p>1.0</p></td>
+<td><p>n:4 %:57</p></td>
+<td><p>n:2 %:29</p></td>
+<td><p>n:2 %:29</p></td>
+<td><p>n:7 %:100</p></td>
 </tr>
 </tbody>
 </table>
@@ -412,8 +412,16 @@ Some guidelines for submitting problem sets in this course:
 <li>At the bottom of the table, indicate the proportion of subjects falling into each category of <span class="math inline">\(Y_{i}(1)\)</span>.</li>
 <li>At the right of the table, indicate the proportion of subjects falling into each category of <span class="math inline">\(Y_{i}(0)\)</span>.</li>
 <li>Use the table to calculate the conditional expectation that <span class="math inline">\(E[Y_{i}(0)|Y_{i}(1) &gt; 15]\)</span>.</li>
+</ol>
+<p><strong>In words, I believe it means “find the expectation (i.e. distribution?) that the outcome of the ith subject were not treated <span class="math inline">\(Y_{i}(0)\)</span>, given that the ith subject’s treatment (i.e.Y_{i}(1)) was greater than 15”</strong></p>
+<p><strong>So using the marginal distributions, we see that for <span class="math inline">\(Y_{i}(1)\)</span>, there are four individual observations that are greater than 15 and now we must take the expectation of these observations:</strong></p>
+<p><span class="math inline">\(E[X] = \sum x Pr[X=x] = \frac{1}{4}(20)+\frac{1}{4}(20)+\frac{1}{4}(30)+\frac{1}{4}(30)=25\)</span></p>
+<ol start="6" style="list-style-type: lower-alpha">
 <li>Use the table to calculate the conditional expectation that <span class="math inline">\(E[Y_{i}(1)|Y_{i}(0) &gt; 15]\)</span>.</li>
 </ol>
+<p><strong>In words, I believe it means “find the expectation (i.e. distribution?) that the outcome of the ith subject were treated <span class="math inline">\(Y_{i}(1)\)</span>, given that the ith subject’s no treatment (i.e.Y_{i}(1)) was greater than 15”</strong></p>
+<p><strong>So using the marginal distributions, we see that for <span class="math inline">\(Y_{i}(0)\)</span>, there are two individual observations that are greater than 15 and now we must take the expectation of these observations:</strong></p>
+<p><span class="math inline">\(E[X] = \sum x Pr[X=x] = \frac{1}{2}(15)+\frac{1}{2}(30)=22.5\)</span></p>
 </div>
 <div id="more-practice-with-potential-outcomes" class="section level1">
 <h1>4. More Practice with Potential Outcomes</h1>

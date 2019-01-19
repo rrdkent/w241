@@ -121,17 +121,17 @@ Use the values depicted in the table above to complete the table below.
 +---------------+----+----+----+--------------------------+
 | $Y_{i}(0)$    | 15 | 20 | 30 | Marginal $Y_{i}(0)$      |
 +===============+====+====+====+==========================+
-|10             | n:1|n:1 |n:0 |%:29                      |
-|               |%:14|%:14|%:0 |                          |
+|10             | n:1|n:1 |n:0 |n:2                       |
+|               |%:14|%:14|%:0 |%:29                      |
 +---------------+----+----+----+--------------------------+
-|15             | n:2| n:1| n:1|%:57                      |
-|               |%:29|%:14|%:14|                          |
+|15             | n:2| n:1| n:1|n:4                       |
+|               |%:29|%:14|%:14|%:57                      |
 +---------------+----+----+----+--------------------------+
-|20             | n:1| n:0| n:1|%:29                      |
-|               |%:14|%:0 |%:14|                          |
+|20             | n:1| n:0| n:1|n:2                       |
+|               |%:14|%:0 |%:14|%:29                      |
 +---------------+----+----+----+--------------------------+
-|Marginal       |%:57|%:29|%:29|                          |
-| $Y_{i}(1)$    |    |    |    | 1.0                      |
+|Marginal       |n:4 |n:2 |n:2 |n:7                       |
+| $Y_{i}(1)$    |%:57|%:29|%:29|%:100                     |
 +---------------+----+----+----+--------------------------+
 
 a. Fill in the number of observations in each of the nine cells; 
@@ -139,7 +139,20 @@ b. Indicate the percentage of all subjects that fall into each of the nine cells
 c. At the bottom of the table, indicate the proportion of subjects falling into each category of $Y_{i}(1)$. 
 d. At the right of the table, indicate the proportion of subjects falling into each category of $Y_{i}(0)$. 
 e. Use the table to calculate the conditional expectation that $E[Y_{i}(0)|Y_{i}(1) > 15]$. 
+
+**In words, I believe it means "find the expectation (i.e. distribution?) that the outcome of the ith subject were not treated $Y_{i}(0)$, given that the ith subject's treatment (i.e.Y_{i}(1)) was greater than 15"**
+
+**So using the marginal distributions, we see that for $Y_{i}(1)$, there are four individual observations that are greater than 15 and now we must take the expectation of these observations:**
+
+$E[X] = \sum x Pr[X=x] = \frac{1}{4}(20)+\frac{1}{4}(20)+\frac{1}{4}(30)+\frac{1}{4}(30)=25$
+
 f. Use the table to calculate the conditional expectation that $E[Y_{i}(1)|Y_{i}(0) > 15]$. 
+
+**In words, I believe it means "find the expectation (i.e. distribution?) that the outcome of the ith subject were  treated $Y_{i}(1)$, given that the ith subject's no treatment (i.e.Y_{i}(1)) was greater than 15"**
+
+**So using the marginal distributions, we see that for $Y_{i}(0)$, there are two individual observations that are greater than 15 and now we must take the expectation of these observations:**
+
+$E[X] = \sum x Pr[X=x] = \frac{1}{2}(15)+\frac{1}{2}(30)=22.5$
 
 # 4. More Practice with Potential Outcomes
 Suppose we are interested in the hypothesis that children playing outside leads them to have better eyesight.  
