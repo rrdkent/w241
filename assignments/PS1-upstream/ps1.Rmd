@@ -170,6 +170,17 @@ In the table, state $Y_{i}(1)$ means "playing outside an average of at least 10 
 
 a. Compute the individual treatment effect for each of the ten children.  Note that this is only possible because we are working with hypothetical potential outcomes; we could never have this much information with real-world data. (We encourage the use of computing tools on all problems, but please describe your work so that we can determine whether you are using the correct values.)
 
+**For each individual test subject, we know that the way to calculate the causal affect of treatment, $\tau_i$, is the difference between the two potential outcomes:**
+
+$\tau_i = Y_i(1) - Y_i(0)$
+
+**So in this case, we will create a new vector that represents the individual differences for each subject.**
+```{r}
+d$tau <- with(d, y1-y0)
+knitr::kable(d)
+```
+
+
 ```{r, echo = F}
 answer.POa <- NA
 ```
