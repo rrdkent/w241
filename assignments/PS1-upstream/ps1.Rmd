@@ -182,15 +182,29 @@ knitr::kable(d)
 
 
 ```{r, echo = F}
-answer.POa <- NA
+answer.POa <- d$tau
 ```
 
 b. In a single paragraph, tell a story that could explain this distribution of treatment effects.
+
+**A hypothetical story is the following: we identified subjects that participated in the study but to ... varying degrees.  Most subjects played outside for the requisite time and did not see any changes.  Subject 2 took it to the extreme and spent an inordinate amount of time outside, much more than the other subjects, and saw an improvment in eyesight.  With the exception of subject 5, all the other children participated and obeyed in the treatment and did normal "kid" stuff. Subject 2 did go and play outside, but it was reported he brought a smartphone with him and played on it while he was playing outside, in addition to being on it nearly all the other time he was awake or not in class.**
+
 c. What might cause some children to have different treatment effects than others?
+
+**After testing the subjects, we identified two that have experienced a change as a result of treatment.  Subjects 2 and 5 demonstrate individual differences of .5 and -.9, respectively.  We identified progress of subject 2, who has the worst vision of the group without treatment, .1 and possesses vision with treatment, while not perfect, much better than without treatment, .6.  Subject 5's vision has unfortunately decayed without treatment; the vision has declined from without treatment 1.6 to .7 with treatment.  Subject 5 might be explained by general maturity of the eye, as eyes' acuity reduces over time with age, though this is not observed in any of our other subjects and could be representative of an additional lurking variable such as genetics that result in eye accuity deterioration not helped by the treatment (i.e. just bad genes that induced degredation in eye acuity at an advanced young age).  On the other hand, subject 2's vision did improve with treatment to a high degree.  Without more data and context about the individual, we conclude that there could also be lurking variables, leading to the improvment; perhaps the subject has played signficantly more time outside than any of the other subjects, and there is a mysterious threshhold for improvment to occur that the other children didn't achieve.  **
+
 d. For this population, what is the true average treatment effect (ATE) of playing outside.
 
+**Since we have computed the individual treatment effects, to compute the average treatment effect, we need to take a simple mean of the values in the vector.**
+
+```{r}
+ate <- mean(d$tau)
+ate
+```
+
+
 ```{r, echo = F}
-answer.POd <- NA
+answer.POd <- ate
 ``` 
 
 e. Suppose we are able to do an experiment in which we can control the amount of time that these children play outside for three years.  We happen to randomly assign the odd-numbered children to treatment and the even-numbered children to control.  What is the estimate of the ATE you would reach under this assignment? (Again, please describe your work.)
