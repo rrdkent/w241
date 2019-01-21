@@ -290,9 +290,12 @@ c. What do these results seem to suggest about the effectiveness of the RTIA as 
 
 # 6. Lotteries
 
-A researcher wants to know how winning large sums of money in a national lottery affect people's views about the estate tax. The research interviews a random sample of adults and compares the attitudes of those who report winning more than $10,000 in the lottery to those who claim to have won little or nothing. The researcher reasons that the lottery choose winners at random, and therefore the amount that people report having won is random. 
+A researcher wants to know how winning large sums of money in a national lottery affect people's views about the estate tax. The research interviews a random sample of adults and compares the attitudes of those who report winning more than $10,000 in the lottery to those who claim to have won little or nothing. The researcher reasons that the lottery chooses winners at random, and therefore the amount that people report having won is random. 
 
-a. Critically emvaluate this assumption. 
+a. Critically evaluate this assumption. 
+
+****
+
 b. Suppose the researcher were to restrict the sample to people who had played the lottery at least once during the past year. Is it safe to assume that the potential outcomes of those who report winning more than $10,000 are identical, in expectation, to those who report winning little or nothing? 
 
 *Clarifications* 
@@ -301,11 +304,15 @@ b. Suppose the researcher were to restrict the sample to people who had played t
 2. The hint about potential outcomes could be rewritten as follows: Do you think those who won the lottery would have had the same views about the estate tax if they had actually not won it as those who actually did not win it? (That is, is $E[Y_{i}0|D=1] = E[Y_{i}0|D=0]$, comparing what would have happened to the actual winners, the $|D=1$ part, if they had not won, the $Y_{i}(0)$ part, and what actually happened to those who did not win, the $Y_{i}(0)|D=0$ part.) In general, it is just another way of asking, "are those who win the lottery and those who have not won the lottery comparable?"
 3. Assume lottery winnings are always observed accurately and there are no concerns about under- or over-reporting.
 
+
 # 7. Inmates and Reading
 A researcher studying 1,000 prison inmates noticed that prisoners who spend at least 3 hours per day reading are less likely to have violent encounters with prison staff. The researcher recommends that all prisoners be required to spend at least three hours reading each day. Let $d_{i}$ be 0 when prisoners read less than three hours each day and 1 when they read more than three hours each day. Let $Y_{i}(0)$ be each prisoner's PO of violent encounters with prison staff when reading less than three hours per day, and let $Y_{i}(1)$ be their PO of violent encounters when reading more than three hours per day. 
 
 In this study, nature has assigned a particular realization of $d_{i}$ to each subject. When assessing this study, why might one be hesitant to assume that ${E[Y_{i}(0)|D_{i}=0] = E[Y_{i}(0)|D_{i}=1]}$ and $E{[Y_{i}(1)|D_{i}=0] = E[Y_{i}(1)|D_{i}=1]}$? In your answer, give some intuitive explanation in English for what the mathematical expressions mean.
 
+**I believe that in this study, the  expressions mean the following:**
+
+${E[Y_{i}(0)|D_{i}=0] = E[Y_{i}(0)|D_{i}=1]}$ **means that the expected probable outcome of violance with the prison staff when reading less than 3 hours per day is equivalent to the expected probable outcome of violance with the prison staff when reading more than 3 hours per day. **
 
 
-
+$E{[Y_{i}(1)|D_{i}=0] = E[Y_{i}(1)|D_{i}=1]}$
