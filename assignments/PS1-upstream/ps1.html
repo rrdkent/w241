@@ -585,9 +585,20 @@ knitr::kable(d)</code></pre>
 ate</code></pre>
 <pre><code>## [1] -0.04</code></pre>
 <ol start="5" style="list-style-type: lower-alpha">
-<li><p>Suppose we are able to do an experiment in which we can control the amount of time that these children play outside for three years. We happen to randomly assign the odd-numbered children to treatment and the even-numbered children to control. What is the estimate of the ATE you would reach under this assignment? (Again, please describe your work.)</p></li>
-<li>How different is the estimate from the truth? Intuitively, why is there a difference?</li>
+<li>Suppose we are able to do an experiment in which we can control the amount of time that these children play outside for three years. We happen to randomly assign the odd-numbered children to treatment and the even-numbered children to control. What is the estimate of the ATE you would reach under this assignment? (Again, please describe your work.)</li>
+</ol>
+<p><strong>To compute this, we would compute the separate ATE </strong></p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li><p>How different is the estimate from the truth? Intuitively, why is there a difference?</p></li>
 <li><p>We just considered one way (odd-even) an experiment might split the children. How many different ways (every possible way) are there to split the children into a treatment versus a control group (assuming at least one person is always in the treatment group and at least one person is always in the control group)?</p></li>
+</ol>
+<p><strong><span class="math inline">\(\frac{N!}{v!(N-v)!}\)</span>, where N = the total number of subjects, v = the number of subjects selected for this draw. So to do it so there is at least one person always in the treatment group/always in the control group, we vary the v between 1 and 9 and sum up the different equations</strong></p>
+<p><span class="math inline">\(\frac{10!}{1!(10-1)!}+\frac{10!}{2!(10-2)!}+\frac{10!}{3!(10-3)!}+\frac{10!}{4!(10-4)!}+\frac{10!}{5!(10-5)!}+\frac{10!}{6!(10-6)!}+\frac{10!}{7!(10-7)!}+\frac{10!}{8!(10-8)!}+\frac{10!}{9!(10-9)!}\)</span></p>
+<pre class="r"><code>group &lt;-factorial(10)/(factorial(1)*factorial(10-1))+factorial(10)/(factorial(2)*factorial(10-2))+factorial(10)/(factorial(3)*factorial(10-3))+factorial(10)/(factorial(4)*factorial(10-4))+factorial(10)/(factorial(5)*factorial(10-5))+factorial(10)/(factorial(6)*factorial(10-7))+factorial(10)/(factorial(8)*factorial(10-8))+factorial(10)/(factorial(9)*factorial(10-9))
+group</code></pre>
+<pre><code>## [1] 1532</code></pre>
+<p><strong>There are 1532 ways to split the children into a treatment versus a control group, assuming at least one person in the treatment group and one in the control group.</strong></p>
+<ol start="8" style="list-style-type: lower-alpha">
 <li><p>Suppose that we decide it is too hard to control the behavior of the children, so we do an observational study instead. Children 1-5 choose to play an average of more than 10 hours per week from age 3 to age 6, while Children 6-10 play less than 10 hours per week. Compute the difference in means from the resulting observational data.</p></li>
 <li><p>Compare your answer in (h) to the true ATE. Intuitively, what causes the difference?</p></li>
 </ol>
