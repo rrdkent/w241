@@ -263,6 +263,8 @@ i. Compare your answer in (h) to the true ATE.  Intuitively, what causes the dif
 
 Suppose that a reasearcher wants to investigate whether after-school math programs improve grades. The researcher randomly samples a group of students from an elementary school and then compare the grades between the group of students who are enrolled in an after-school math program to those who do not attend any such program. Is this an experiment or an observational study? Why? 
 
+**We recall that an experiment is an intervention that creates variation in order to teach us about causal questions.  Intervention is the key component of experimentation.  Natural experiments involve naturally occurring data that a researcher argues have the same properties as a true, controlled experiment.  This would require situations where variation was produced by something like random assignment.  Unfortunately the researcher in this example, while randomly samples the group of students int he elementary schools, does not intervene and randomly assign the students to the different treatments.  Consequently this is an observational study since there is no good reason to believe that those who recieved an intervention are otherwise identical to those who did not - perhaps there are other lurking variables like socio-economic-status that facilitate the ability of students to attend after school programs and have other correlated confounds that improve grades like access to tutors, access to nutrious meals and so forth.**
+
 <!--
 #7: Skip in 2017
 # 7. FE, exercise 2.8
