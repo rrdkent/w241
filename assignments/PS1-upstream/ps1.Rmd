@@ -294,7 +294,7 @@ A researcher wants to know how winning large sums of money in a national lottery
 
 a. Critically evaluate this assumption. 
 
-****
+**I believe that while the the lottery chooses winners at random, not all individuals play the lottery the same way.  For example, I suspect that when the amount of the prize is significant;, in drawings where the winnings are in the hundreds of millions to nearly a billion dollars, individuals who would typically not play the lottery when the prize winning is much less would be induced to play.  These individuals would then potentially posesss a different attitude to the estate tax.  Consequently, their potential outcome might be different because if the lottery only reaches hundreds of millions of dollars occasionally, versus the fact that there will frequently be lottery options for individuals to play that are less those millions of dollars and thus because of the difference in segmentation of players and difference in types of lottery winnings, the amount that people report winning will not be truly random.**
 
 b. Suppose the researcher were to restrict the sample to people who had played the lottery at least once during the past year. Is it safe to assume that the potential outcomes of those who report winning more than $10,000 are identical, in expectation, to those who report winning little or nothing? 
 
