@@ -124,14 +124,14 @@ Use the values depicted in the table above to complete the table below.
 |10             | n:1|n:1 |n:0 |n:2                       |
 |               |%:14|%:14|%:0 |%:29                      |
 +---------------+----+----+----+--------------------------+
-|15             | n:2| n:1| n:1|n:4                       |
+|15             | n:2| n:0| n:1|n:4                       |
 |               |%:29|%:14|%:14|%:57                      |
 +---------------+----+----+----+--------------------------+
 |20             | n:1| n:0| n:1|n:2                       |
 |               |%:14|%:0 |%:14|%:29                      |
 +---------------+----+----+----+--------------------------+
-|Marginal       |n:4 |n:2 |n:2 |n:7                       |
-| $Y_{i}(1)$    |%:57|%:29|%:29|%:100                     |
+|Marginal       |n:4 |n:1 |n:2 |n:7                       |
+| $Y_{i}(1)$    |%:57|%:14|%:29|%:100                     |
 +---------------+----+----+----+--------------------------+
 
 a. Fill in the number of observations in each of the nine cells; 
@@ -187,9 +187,7 @@ answer.POa <- d$tau
 
 b. In a single paragraph, tell a story that could explain this distribution of treatment effects.
 
-**A hypothetical story is the following: we identified subjects that participated in the study but to ... varying degrees.  Most subjects played outside for the requisite time and did not see any changes.  Subject 2 took it to the extreme and spent an inordinate amount of time outside, much more than the other subjects, and saw an improvment in eyesight.  With the exception of subject 5, all the other children participated and obeyed in the treatment and did normal "kid" stuff. Subject 2 did go and play outside, but it was reported he brought a smartphone with him and played on it while he was playing outside, in addition to being on it nearly all the other time he was awake or not in class.**
-
-ADD WHY NO TREATMENT AFFECT FOR MOST PEOPLE
+**A hypothetical story is the following: we identified subjects that participated in the study but to ... varying degrees.  Most subjects played outside for the requisite time and did not see any changes because most children don't see any vision changes between the ages of 3 and 6.  For example, I got my glasses when I was 9.  Subject 2 took it to the extreme and spent an inordinate amount of time outside, much more than the other subjects, and saw an improvment in eyesight.  With the exception of subject 5, all the other children participated and obeyed in the treatment and did normal "kid" stuff. Subject 2 did go and play outside, but it was reported he brought a smartphone with him and played on it while he was playing outside, in addition to being on it nearly all the other time he was awake or not in class.**
 
 c. What might cause some children to have different treatment effects than others?
 
@@ -295,9 +293,13 @@ A researcher wants to know how winning large sums of money in a national lottery
 
 a. Critically evaluate this assumption. 
 
-**I believe that while the the lottery chooses winners at random, not all individuals play the lottery the same way.  For example, I suspect that when the amount of the prize is significant;, in drawings where the winnings are in the hundreds of millions to nearly a billion dollars, individuals who would typically not play the lottery when the prize winning is much less would be induced to play.  These individuals would then potentially posesss a different attitude to the estate tax.  Consequently, their potential outcome might be different because if the lottery only reaches hundreds of millions of dollars occasionally, versus the fact that there will frequently be lottery options for individuals to play that are less those millions of dollars and thus because of the difference in segmentation of players and difference in types of lottery winnings, the amount that people report winning will not be truly random.**
+<!-- The lottery chooses people at random, but people don't randomly choose to play the lottery - there is different propensities to play based upon segmentation!-->
+
+**I believe that while the the lottery chooses winners at random, not all individuals play the lottery the same way.  For example, I suspect that when the amount of the prize is significant; in drawings where the winnings are in the hundreds of millions to nearly a billion dollars, individuals who would typically not play the lottery when the prize winning is much less would be induced to play.  These individuals would then potentially posesss a different attitude to the estate tax.  Consequently, their potential outcome might be different because if the lottery only reaches hundreds of millions of dollars occasionally, versus the fact that there will frequently be lottery options for individuals to play that are less those millions of dollars and thus because of the difference in segmentation of players and difference in types of lottery winnings, the amount that people report winning will not be truly random.**
 
 b. Suppose the researcher were to restrict the sample to people who had played the lottery at least once during the past year. Is it safe to assume that the potential outcomes of those who report winning more than $10,000 are identical, in expectation, to those who report winning little or nothing? 
+
+
 
 *Clarifications* 
 
