@@ -209,19 +209,46 @@ answer.POd <- ate
 
 e. Suppose we are able to do an experiment in which we can control the amount of time that these children play outside for three years.  We happen to randomly assign the odd-numbered children to treatment and the even-numbered children to control.  What is the estimate of the ATE you would reach under this assignment? (Again, please describe your work.)
 
+**To calculate the estimate of the ATE, we take the difference between the average of Treatment group and the Control group**
 
+Treatment:
 ```{r}
+#Odd
+emean1 <- mean(d$y1[seq(1,10,2)])
+emean1
 
 ```
 
+Control:
+```{r}
+#Even
+emean2 <- mean(d$y1[seq(2,10,2)])
+emean2
+```
 
+Difference:
+```{r}
+emeandif = emean1 - emean2
+emeandif
+```
+
+**The estimated ATE (i.e. difference in means) from this protocol would be would be -0.16**
 ```{r, echo = F}
-answer.POe <- NA
+answer.POe <- emeandif
 ``` 
 
 f. How different is the estimate from the truth?  Intuitively, why is there a difference?
 
 
+
+**This assignment's ATE is somewhat less than the true ATE -- -0.16 and -0.04, respectively.  There is a difference because the samples are very small in addition to the fact that because of the "random" assignment, the treatment (and control) groups had a generally worse acuity versus the true population.**
+
+```{r}
+mean(d$y1)
+```
+```{r}
+mean(d$y0)
+```
 
 g. We just considered one way (odd-even) an experiment might split the children. How many different ways (every possible way) are there to split the children into a treatment versus a control group (assuming at least one person is always in the treatment group and at least one person is always in the control group)?
 
@@ -245,32 +272,33 @@ h. Suppose that we decide it is too hard to control the behavior of the children
 
 **OK, my understanding is we take the means of each group and then take the difference of each.  So first we calculate the means of each:**
 
-$Y_i(1)$:
+Treatment:
 ```{r}
 hmean1 <- mean(d$y1[1:5])
 hmean1
 ```
-$Y_i(0)$:
+Control
 ```{r}
 hmean2 <- mean(d$y0[6:10])
 hmean2
 ```
 **Now we take the difference of the two to find the difference of means:**
 
-$Y_i(1)-Y_i(0)=$
+Treatment-Control
 ```{r}
-hmean1 - hmean2
+hmeandif <- hmean1 - hmean2
+hmeandif
 ```
 
-
+**The estimated ATE (difference in means) is -0.44.**
 
 ```{r, echo = F}
-answer.POh <- hmean1 - hmean2
+answer.POh <- hmeandif
 ``` 
 
 i. Compare your answer in (h) to the true ATE.  Intuitively, what causes the difference?
 
-**We observed that the True ATE is -.04 and the answer in h is much lower at -0.44.  This difference is a result of the small population and the random chance that we got subjects in the $Y_i(1)$ group who had better visual acuity than those in the $Y_i(0)$ group.**
+**We observed that the True ATE is -.04 and the answer in h is much lower at -0.44.  This difference is a result of the small population and the random chance that we got subjects in the Treatment group who had worse visual acuity than the true population and a control group where the average acuity was better than the true population.**
 
 
 <!--

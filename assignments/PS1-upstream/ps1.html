@@ -585,9 +585,34 @@ knitr::kable(d)</code></pre>
 ate</code></pre>
 <pre><code>## [1] -0.04</code></pre>
 <ol start="5" style="list-style-type: lower-alpha">
-<li><p>Suppose we are able to do an experiment in which we can control the amount of time that these children play outside for three years. We happen to randomly assign the odd-numbered children to treatment and the even-numbered children to control. What is the estimate of the ATE you would reach under this assignment? (Again, please describe your work.)</p></li>
-<li><p>How different is the estimate from the truth? Intuitively, why is there a difference?</p></li>
-<li><p>We just considered one way (odd-even) an experiment might split the children. How many different ways (every possible way) are there to split the children into a treatment versus a control group (assuming at least one person is always in the treatment group and at least one person is always in the control group)?</p></li>
+<li>Suppose we are able to do an experiment in which we can control the amount of time that these children play outside for three years. We happen to randomly assign the odd-numbered children to treatment and the even-numbered children to control. What is the estimate of the ATE you would reach under this assignment? (Again, please describe your work.)</li>
+</ol>
+<p><strong>To calculate the estimate of the ATE, we take the difference between the average of Treatment group and the Control group</strong></p>
+<p>Treatment:</p>
+<pre class="r"><code>#Odd
+emean1 &lt;- mean(d$y1[seq(1,10,2)])
+emean1</code></pre>
+<pre><code>## [1] 0.9</code></pre>
+<p>Control:</p>
+<pre class="r"><code>#Even
+emean2 &lt;- mean(d$y1[seq(2,10,2)])
+emean2</code></pre>
+<pre><code>## [1] 1.06</code></pre>
+<p>Difference:</p>
+<pre class="r"><code>emeandif = emean1 - emean2
+emeandif</code></pre>
+<pre><code>## [1] -0.16</code></pre>
+<p><strong>The estimated ATE (i.e. difference in means) from this protocol would be would be -0.16</strong></p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>How different is the estimate from the truth? Intuitively, why is there a difference?</li>
+</ol>
+<p><strong>This assignment’s ATE is somewhat less than the true ATE – -0.16 and -0.04, respectively. There is a difference because the samples are very small in addition to the fact that because of the “random” assignment, the treatment (and control) groups had a generally worse acuity versus the true population.</strong></p>
+<pre class="r"><code>mean(d$y1)</code></pre>
+<pre><code>## [1] 0.98</code></pre>
+<pre class="r"><code>mean(d$y0)</code></pre>
+<pre><code>## [1] 1.02</code></pre>
+<ol start="7" style="list-style-type: lower-alpha">
+<li>We just considered one way (odd-even) an experiment might split the children. How many different ways (every possible way) are there to split the children into a treatment versus a control group (assuming at least one person is always in the treatment group and at least one person is always in the control group)?</li>
 </ol>
 <p><strong>This should be a combination, not a permutation. Because order does not matter, so we can do the following: <span class="math inline">\(\frac{N!}{v!(N-v)!}\)</span>, where N = the total number of subjects, v = the number of subjects selected for this draw. So to do it so there is at least one person always in the treatment group/always in the control group, we vary the v between 1 and 9 and sum up the different equations</strong></p>
 <p><span class="math inline">\(\frac{10!}{1!(10-1)!}+\frac{10!}{2!(10-2)!}+\frac{10!}{3!(10-3)!}+\frac{10!}{4!(10-4)!}+\frac{10!}{5!(10-5)!}+\frac{10!}{6!(10-6)!}+\frac{10!}{7!(10-7)!}+\frac{10!}{8!(10-8)!}+\frac{10!}{9!(10-9)!}\)</span></p>
@@ -599,22 +624,24 @@ group</code></pre>
 <li>Suppose that we decide it is too hard to control the behavior of the children, so we do an observational study instead. Children 1-5 choose to play an average of more than 10 hours per week from age 3 to age 6, while Children 6-10 play less than 10 hours per week. Compute the difference in means from the resulting observational data.</li>
 </ol>
 <p><strong>OK, my understanding is we take the means of each group and then take the difference of each. So first we calculate the means of each:</strong></p>
-<p><span class="math inline">\(Y_i(1)\)</span>:</p>
+<p>Treatment:</p>
 <pre class="r"><code>hmean1 &lt;- mean(d$y1[1:5])
 hmean1</code></pre>
 <pre><code>## [1] 0.76</code></pre>
-<p><span class="math inline">\(Y_i(0)\)</span>:</p>
+<p>Control</p>
 <pre class="r"><code>hmean2 &lt;- mean(d$y0[6:10])
 hmean2</code></pre>
 <pre><code>## [1] 1.2</code></pre>
 <p><strong>Now we take the difference of the two to find the difference of means:</strong></p>
-<p><span class="math inline">\(Y_i(1)-Y_i(0)=\)</span></p>
-<pre class="r"><code>hmean1 - hmean2</code></pre>
+<p>Treatment-Control</p>
+<pre class="r"><code>hmeandif &lt;- hmean1 - hmean2
+hmeandif</code></pre>
 <pre><code>## [1] -0.44</code></pre>
+<p><strong>The estimated ATE (difference in means) is -0.44.</strong></p>
 <ol style="list-style-type: lower-roman">
 <li>Compare your answer in (h) to the true ATE. Intuitively, what causes the difference?</li>
 </ol>
-<p><strong>We observed that the True ATE is -.04 and the answer in h is much lower at -0.44. This difference is a result of the small population and the random chance that we got subjects in the <span class="math inline">\(Y_i(1)\)</span> group who had better visual acuity than those in the <span class="math inline">\(Y_i(0)\)</span> group.</strong></p>
+<p><strong>We observed that the True ATE is -.04 and the answer in h is much lower at -0.44. This difference is a result of the small population and the random chance that we got subjects in the Treatment group who had worse visual acuity than the true population and a control group where the average acuity was better than the true population.</strong></p>
 <!--
 # 5. FE, exercise 2.5
 
