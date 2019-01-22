@@ -348,7 +348,7 @@ a. Critically evaluate this assumption.
 
 b. Suppose the researcher were to restrict the sample to people who had played the lottery at least once during the past year. Is it safe to assume that the potential outcomes of those who report winning more than $10,000 are identical, in expectation, to those who report winning little or nothing? 
 
-
+**I believe this is not the case, because individuals have different propensities to play.  For some individuals who play regularly, the potential outcome would be very different than those who play extrodinarly infrquently (like once a year on their birthday).  Therefore in the former group, because they play more often, they have a greater possiblity to win and thus a higher potential outcome, versus those individuals who play infrequently, have a lower probability to win and a lower potential outcome.  **
 
 *Clarifications* 
 
