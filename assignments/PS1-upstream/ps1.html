@@ -596,9 +596,25 @@ group</code></pre>
 <pre><code>## [1] 1532</code></pre>
 <p><strong>There are 1532 ways to split the children into a treatment versus a control group, assuming at least one person in the treatment group and one in the control group.</strong></p>
 <ol start="8" style="list-style-type: lower-alpha">
-<li><p>Suppose that we decide it is too hard to control the behavior of the children, so we do an observational study instead. Children 1-5 choose to play an average of more than 10 hours per week from age 3 to age 6, while Children 6-10 play less than 10 hours per week. Compute the difference in means from the resulting observational data.</p></li>
-<li><p>Compare your answer in (h) to the true ATE. Intuitively, what causes the difference?</p></li>
+<li>Suppose that we decide it is too hard to control the behavior of the children, so we do an observational study instead. Children 1-5 choose to play an average of more than 10 hours per week from age 3 to age 6, while Children 6-10 play less than 10 hours per week. Compute the difference in means from the resulting observational data.</li>
 </ol>
+<p><strong>OK, my understanding is we take the means of each group and then take the difference of each. So first we calculate the means of each:</strong></p>
+<p><span class="math inline">\(Y_i(1)\)</span>:</p>
+<pre class="r"><code>hmean1 &lt;- mean(d$y1[1:5])
+hmean1</code></pre>
+<pre><code>## [1] 0.76</code></pre>
+<p><span class="math inline">\(Y_i(0)\)</span>:</p>
+<pre class="r"><code>hmean2 &lt;- mean(d$y0[6:10])
+hmean2</code></pre>
+<pre><code>## [1] 1.2</code></pre>
+<p><strong>Now we take the difference of the two to find the difference of means:</strong></p>
+<p><span class="math inline">\(Y_i(1)-Y_i(0)=\)</span></p>
+<pre class="r"><code>hmean1 - hmean2</code></pre>
+<pre><code>## [1] -0.44</code></pre>
+<ol style="list-style-type: lower-roman">
+<li>Compare your answer in (h) to the true ATE. Intuitively, what causes the difference?</li>
+</ol>
+<p><strong>We observed that the True ATE is -.04 and the answer in h is much lower at -0.44. This difference is a result of the small population and the random chance that we got subjects in the Y_i(1) group who had better visual acuity than those in the Y_i(0) group.</strong></p>
 <!--
 # 5. FE, exercise 2.5
 

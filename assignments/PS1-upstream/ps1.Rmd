@@ -265,10 +265,12 @@ hmean1 - hmean2
 
 
 ```{r, echo = F}
-answer.POh <- NA
+answer.POh <- hmean1 - hmean2
 ``` 
 
 i. Compare your answer in (h) to the true ATE.  Intuitively, what causes the difference?
+
+**We observed that the True ATE is -.04 and the answer in h is much lower at -0.44.  This difference is a result of the small population and the random chance that we got subjects in the Y_i(1) group who had better visual acuity than those in the Y_i(0) group.**
 
 
 <!--
