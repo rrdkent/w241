@@ -210,10 +210,48 @@ Some guidelines for submitting problem sets in this course:
 <h1>1. What happens when pilgrims attend the Hajj pilgrimage to Mecca?</h1>
 <p>On the one hand, participating in a common task with a diverse group of pilgrims might lead to increased mutual regard through processes identified in <em>Contact Theories</em>. On the other hand, media narritives have raised the spectre that this might be accompanied by “antipathy toward non-Muslims”. <a href="https://dash.harvard.edu/handle/1/3659699">Clingingsmith, Khwaja and Kremer (2009)</a> investigates the question.</p>
 <p>Using the data here, test the sharp null hypothesis that winning the visa lottery for the pilgrimage to Mecca had no effect on the views of Pakistani Muslims toward people from other countries. Assume that the Pakistani authorities assigned visas using complete random assignment. Use, as your primary outcome the <code>views</code> variable, and as your treatment feature <code>success</code>. If you’re ambitious, write your fucntion generally so that you can also evaluate feeligns toward specific nationalities.</p>
-<pre class="r"><code>d &lt;- read.csv(&quot;./data/Clingingsmith.2009.csv&quot;, stringsAsFactors = FALSE)</code></pre>
+<pre class="r"><code>d &lt;- read.csv(&quot;./data/Clingingsmith.2009.csv&quot;, stringsAsFactors = FALSE)
+dt &lt;- data.table(d)</code></pre>
 <ol style="list-style-type: lower-alpha">
-<li><p>Using either <code>dplyr</code> or <code>data.table</code>, group the data by <code>success</code> and report whether views toward others are generally more positive among lottery winners or lottery non-winners.</p></li>
-<li><p>But is this a meaningful difference, or could it just be randomization noise? Conduct 10,000 simulated random assignments under the sharp null hypothesis to find out. (Don’t just copy the code from the async, think about how to write this yourself.)</p></li>
+<li>Using either <code>dplyr</code> or <code>data.table</code>, group the data by <code>success</code> and report whether views toward others are generally more positive among lottery winners or lottery non-winners.</li>
+</ol>
+<p><strong>We recall from the Datacamp Unit on data.table that the format for datatable is i, j, by, or in SQL-speak, WHERE, SELECT, GROUPBY. Consequently, we want to groupby success and measure the average view. That is, we want to get the mean of the views, grouped by success.</strong></p>
+<pre class="r"><code>dt[,.(mean = mean(views)),by = success]</code></pre>
+<pre><code>##    success     mean
+## 1:       0 1.868304
+## 2:       1 2.343137</code></pre>
+<p><strong>From these data, we do see that, across all observations, those individuals who had “success” (1) with the lottery held a more positive view, in aggregate, than those who “did not have success” (0) to a degree of approximately 2.34 to 1.87</strong></p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>But is this a meaningful difference, or could it just be randomization noise? Conduct 10,000 simulated random assignments under the sharp null hypothesis to find out. (Don’t just copy the code from the async, think about how to write this yourself.)</li>
+</ol>
+<p><strong>OK, first we want to see how many of each (success and no-success) do we have, of which to accurately take a sample.</strong></p>
+<pre class="r"><code>dt[, .(count = .N), by=success]</code></pre>
+<pre><code>##    success count
+## 1:       0   448
+## 2:       1   510</code></pre>
+<p><strong>We see that there is a minimum of 448 observations for “no success”. Consequently, let’s take 30% of 448 for each of our samples of success and no success.</strong></p>
+<pre class="r"><code>.3*448</code></pre>
+<pre><code>## [1] 134.4</code></pre>
+<p><strong>We’ll take 135 samples of each group. Our Sharpe Null hypothesis is that there is a <span class="math inline">\(\tau\)</span> of no change, that is, <span class="math inline">\(H_A-H_0=0\)</span>, where <span class="math inline">\(H_A\)</span> refers to the success of getting a visa, and <span class="math inline">\(H_0\)</span> refers to not being successful in getting a visa. </strong></p>
+</div>
+<div id="create-a-vector-of-successes-and-losses" class="section level1">
+<h1>Create a vector of successes and losses</h1>
+</div>
+<div id="create-a-function-that" class="section level1">
+<h1>Create a function that:</h1>
+</div>
+<div id="randomly-draw-135-from-each" class="section level1">
+<h1>Randomly draw 135 from each</h1>
+</div>
+<div id="calculate-each-groups-view-mean." class="section level1">
+<h1>calculate each group’s view mean.</h1>
+</div>
+<div id="calculate-ate-hat-by-subtracting-loss-from-success" class="section level1">
+<h1>calculate ate-hat by subtracting loss from success</h1>
+</div>
+<div id="store-ate-hat-into-a-vector" class="section level1">
+<h1>store ate-hat into a vector</h1>
+<ol start="3" style="list-style-type: lower-alpha">
 <li><p>How many of the simulated random assignments generate an estimated ATE that is at least as large as the actual estimate of the ATE?</p></li>
 <li><p>What is the implied <em>one-tailed</em> p-value?</p></li>
 <li><p>How many of the simulated random assignments generate an estimated ATE that is at least as large <em>in absolute value</em> as the actual estimate of the ATE?</p></li>

@@ -35,19 +35,53 @@ Using the data here, test the sharp null hypothesis that winning the visa lotter
 
 ```{r}
 d <- read.csv("./data/Clingingsmith.2009.csv", stringsAsFactors = FALSE)
-
+dt <- data.table(d)
 ```
 a. Using either `dplyr` or `data.table`, group the data by `success` and report whether views toward others are generally more positive among lottery winners or lottery non-winners. 
 
-```{r}
+**We recall from the Datacamp Unit on data.table that the format for datatable is i, j, by, or in SQL-speak, WHERE, SELECT, GROUPBY.  Consequently, we want to groupby success and measure the average view.  That is, we want to get the mean of the views, grouped by success.  Or said formally, **
 
+```{r}
+dt[,.(mean = mean(views)),by = success]
 ```
+
+**From these data, we do see that, across all observations, those individuals who had "success" (1) with the lottery held a more positive view, in aggregate, than those who "did not have success" (0) to a degree of approximately 2.34 to 1.87**
 
 b. But is this a meaningful difference, or could it just be randomization noise? Conduct 10,000 simulated random assignments under the sharp null hypothesis to find out. (Don't just copy the code from the async, think about how to write this yourself.) 
 
+**OK, first we want to see how many of each (success and no-success) do we have, just out of curiosity.**
 ```{r}
-
+dt[, .(count = .N), by=success]
 ```
+
+**We see that it's very roughly 50/50**
+
+
+**We'll take 30% of the total number of records.**
+
+```{r}
+dt[,.(count = .N),]*.3
+```
+
+**So our sample will consist of 288 records.**
+
+
+**Our Sharpe Null hypothesis is that there is a $\tau$ of no change, that is, $H_A-H_0=0$, where $H_A$ refers to the success of getting a visa, and $H_0$ refers to not being successful in getting a visa.  **
+
+**My proceedure will be the following:**
+**Create a function that: **
+**Randomly draw 288 records**
+**Stores in a vector the number of successes for each group**
+**calculate each group's view mean.**
+**calculate ate-hat by subtracting loss from success**
+**store ate-hat into a vector**
+
+```{r}
+dt[, , by = .(success==1)]
+```
+
+
+
 
 c. How many of the simulated random assignments generate an estimated ATE that is at least as large as the actual estimate of the ATE? 
 
