@@ -9,6 +9,11 @@ First, we create a grouping variable with two groups, one called "Man", and anot
 group <- c(rep("Man",20),rep("Woman",20))
 ``` 
 
+```{r}
+group
+```
+
+
 To these groups, we assign silly, but schematically heplful *potential outcomes* to treatment and control. We say that, by some chance, we sampled men into our study that had estrogen ppm levels that ranged from 1-20, in perfect increments. Also, what luck, but we sampled women into the study that had estrogen levels that ranged from 51-70. So, the women have on average higher estrogen beginning the study. 
 
 ```{r}
@@ -26,6 +31,10 @@ randomize <- function() {
 } 
 ## from the help file
 ## For sample the default for size is the number of items inferred from the first argument
+```
+
+```{r}
+randomize()
 ```
 
 As is the case with David R's comments in the async material, if this code isn't strictly intuitive to you, we have lots of options to write other randomization functions. 
@@ -66,6 +75,11 @@ outcomesV2 <- rep(NA, length(group))
 outcomesV2[treatment == 0] <- po_control[treatment == 0]
 outcomesV2[treatment == 1] <- po_treatment[treatment == 1] 
 ``` 
+
+```{r}
+outcomesV2
+```
+
 
 Although if you're coming from another language that doesn't place such a high value on vectorized operations, you might go for it in the following way: 
 

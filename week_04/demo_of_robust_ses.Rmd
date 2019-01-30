@@ -15,6 +15,11 @@ set.seed(1414)
 group <- c(rep("Man",20),rep("Woman",20))
 ```
 
+```{r}
+group
+```
+
+
 Let's also built back a really simple function to randomize the order of treatment and controls, just like we had last week. 
 
 ```{r}
@@ -22,6 +27,7 @@ randomize <- function() {
   sample(c(rep(0, 20), rep(1, 20)))
   } 
 ```
+
 If we use this code to randomly assign treatment and control, then on average, the randomization assignments will mete out to be balanced, but of course there is no guarantee that this occurs for any particular instance. For example: 
 ```{r}
 table(group, randomize())
@@ -103,10 +109,31 @@ table(group, randomize_blocked())
 2. Does the restricted set of randomizations that we're realizing seem like "cheating"? Why or why not? 
 
 ```{r}
-
+sim_normal_study <- function() {
+  po_control <- c(seq(from = 1, to = 20), seq(from = 51, to = 70))
+  po_treatment <- po_control
+  treatment <- randomize_blocked()
+  outcomes <- po_treatment * treatment + po_control * (1 - treatment)
+  ate <- est_ate(outcomes, treatment)
+  n_women_treatment <- table(group, treatment)[2, 2]
+  return(list(ate = ate, n_women_treatment = n_women_treatment))
+}
 ```
 
+```{r}
+s2 <- sim_normal_study()
+s2
+```
 
+```{r}
+results2 <- t(replicate(1000, sim_normal_study()))
+source("http://ischool.berkeley.edu/~d.alex.hughes/code/pubPlot.R")
+plot(results2, 
+     main = "ATE and women in Treatment Condition", 
+     xlab = "Average Treatment Effect", 
+     ylab = "Women in Treatment")
+abline(v = 0, col = "blue", lwd = 2)
+``` 
 
 ## Re-run the last experiment with blocking
 If we re-run the soy/estrogen experiment/observation from the last section, but we explicitly block on the number of men and women that we randomize into treatment and control arms, what happens? 
@@ -247,6 +274,11 @@ Let's add in a uniform treatment effect (this is the sharp treatment?).
 student_outcomes_treat <- student_outcomes_control + 0.75
 ``` 
 
+```{r}
+student_outcomes_treat
+```
+
+
 Alright! The data is set up. Or very nearly so. The last step here is to randomize at the classroom level.  Here, we write a little function that will create a vector of 1s and 0s (Treatment and Control) for those classrooms that are in the treatment condition. Since we're assigning in equal proporstions to treatment and control, we are going to sample the `all_classrooms` object and pick 1/2 of them to be in the treatment condition.
 
 ```{r}
@@ -274,6 +306,15 @@ Now that we're sure it "works", let's actually make the treament assignment vect
 treat <- randomize_clustered()
 outcomes <- treat * student_outcomes_treat + (1-treat) * student_outcomes_control
 ``` 
+
+```{r}
+treat
+```
+
+```{r}
+outcomes
+```
+
 
 With that in hand, we can easily calculate the ATE using the function we wrote earlier. 
 
