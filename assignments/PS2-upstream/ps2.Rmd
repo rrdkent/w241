@@ -116,10 +116,13 @@ sum(results >= true_ate)
 
 d. What is the implied *one-tailed* p-value? 
 
+**We recall that we can get the p-value under the randomization inference framework, by examining hte precent of values that occur at a place that is smaller or larger than the p-value we observe by taking the mean of the true ATE and the distribution under the sharpe null. **
+
 ```{r}
-
-
+mean(true_ate <results )
 ```
+
+We see that this is boarderline signficant at .055.
 
 e. How many of the simulated random assignments generate an estimated ATE that is at least as large *in absolute value* as the actual estimate of the ATE? 
 
