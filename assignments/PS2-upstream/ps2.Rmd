@@ -70,15 +70,30 @@ dt[,.(count = .N),]*.3
 
 **My proceedure will be the following:**
 **Create a function that: **
-**Randomly draw 288 records**
-**Stores in a vector the number of successes for each group**
-**calculate each group's view mean.**
-**calculate ate-hat by subtracting loss from success**
-**store ate-hat into a vector**
+**  Randomly draw 288 records**
+**  Stores in a vector the number of successes for each group**
+**  calculate each group's view mean.**
+**  calculate ate-hat by subtracting loss from success**
+**  store ate-hat into a vector**
 
 ```{r}
-dt[, , by = .(success==1)]
+#Create a function:
+run_study <- function(){
+  # pull a sample & store it in a vector
+  my_sample <- as.data.table(sapply(dt[], sample, 288))
+  #return the number of successes
+  #take mysample, calculate the mean, grouped by success
+  #calculate ate-hat by subtracting loss from success
+  #return ate-hat
+  my_sample
+}
 ```
+
+```{r}
+run_study()
+```
+
+
 
 
 
