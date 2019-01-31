@@ -132,9 +132,13 @@ sum(abs(results) >= true_ate)
 
 f. What is the implied two-tailed p-value? 
 
-```{r}
+**My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.**
 
+```{r}
+mean(true_ate <results )*2
 ```
+
+**.11 is not significant and means that we do not reject the Sharpe Null Hypothesis.**
 
 # 2. Term Limits Aren't Good. 
 
