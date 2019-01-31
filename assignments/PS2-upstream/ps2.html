@@ -11,7 +11,7 @@
 
 <meta name="author" content="Daniel Kent, Spring 2019" />
 
-<meta name="date" content="2019-01-30" />
+<meta name="date" content="2019-01-31" />
 
 <title>Problem Set 2, Experiments and Causality</title>
 
@@ -187,7 +187,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Problem Set 2, Experiments and Causality</h1>
 <h4 class="author"><em>Daniel Kent, Spring 2019</em></h4>
-<h4 class="date"><em>January 30, 2019</em></h4>
+<h4 class="date"><em>January 31, 2019</em></h4>
 
 </div>
 
@@ -215,48 +215,73 @@ dt &lt;- data.table(d)</code></pre>
 <ol style="list-style-type: lower-alpha">
 <li>Using either <code>dplyr</code> or <code>data.table</code>, group the data by <code>success</code> and report whether views toward others are generally more positive among lottery winners or lottery non-winners.</li>
 </ol>
-<p><strong>We recall from the Datacamp Unit on data.table that the format for datatable is i, j, by, or in SQL-speak, WHERE, SELECT, GROUPBY. Consequently, we want to groupby success and measure the average view. That is, we want to get the mean of the views, grouped by success.</strong></p>
+<p><strong>We recall from the Datacamp Unit on data.table that the format for datatable is i, j, by, or in SQL-speak, WHERE, SELECT, GROUPBY. Consequently, we want to groupby success and measure the average view. That is, we want to get the mean of the views, grouped by success. Or said formally, </strong></p>
 <pre class="r"><code>dt[,.(mean = mean(views)),by = success]</code></pre>
 <pre><code>##    success     mean
 ## 1:       0 1.868304
 ## 2:       1 2.343137</code></pre>
 <p><strong>From these data, we do see that, across all observations, those individuals who had “success” (1) with the lottery held a more positive view, in aggregate, than those who “did not have success” (0) to a degree of approximately 2.34 to 1.87</strong></p>
+<pre class="r"><code>true_ate &lt;- dt[,.(mean = mean(views)),by = success]$mean[2]-dt[,.(mean = mean(views)),by = success]$mean[1]
+true_ate</code></pre>
+<pre><code>## [1] 0.4748337</code></pre>
+<p><strong>We observe that the true ATE is approximately .48</strong></p>
 <ol start="2" style="list-style-type: lower-alpha">
 <li>But is this a meaningful difference, or could it just be randomization noise? Conduct 10,000 simulated random assignments under the sharp null hypothesis to find out. (Don’t just copy the code from the async, think about how to write this yourself.)</li>
 </ol>
-<p><strong>OK, first we want to see how many of each (success and no-success) do we have, of which to accurately take a sample.</strong></p>
+<p><strong>OK, first we want to see how many of each (success and no-success) do we have, just out of curiosity.</strong></p>
 <pre class="r"><code>dt[, .(count = .N), by=success]</code></pre>
 <pre><code>##    success count
 ## 1:       0   448
 ## 2:       1   510</code></pre>
-<p><strong>We see that there is a minimum of 448 observations for “no success”. Consequently, let’s take 30% of 448 for each of our samples of success and no success.</strong></p>
-<pre class="r"><code>.3*448</code></pre>
-<pre><code>## [1] 134.4</code></pre>
-<p><strong>We’ll take 135 samples of each group. Our Sharpe Null hypothesis is that there is a <span class="math inline">\(\tau\)</span> of no change, that is, <span class="math inline">\(H_A-H_0=0\)</span>, where <span class="math inline">\(H_A\)</span> refers to the success of getting a visa, and <span class="math inline">\(H_0\)</span> refers to not being successful in getting a visa. </strong></p>
-</div>
-<div id="create-a-vector-of-successes-and-losses" class="section level1">
-<h1>Create a vector of successes and losses</h1>
-</div>
-<div id="create-a-function-that" class="section level1">
-<h1>Create a function that:</h1>
-</div>
-<div id="randomly-draw-135-from-each" class="section level1">
-<h1>Randomly draw 135 from each</h1>
-</div>
-<div id="calculate-each-groups-view-mean." class="section level1">
-<h1>calculate each group’s view mean.</h1>
-</div>
-<div id="calculate-ate-hat-by-subtracting-loss-from-success" class="section level1">
-<h1>calculate ate-hat by subtracting loss from success</h1>
-</div>
-<div id="store-ate-hat-into-a-vector" class="section level1">
-<h1>store ate-hat into a vector</h1>
+<p><strong>We see that it’s very roughly 50/50</strong></p>
+<p><strong>We’ll take 30% of the total number of records.</strong></p>
+<pre class="r"><code>dt[,.(count = .N),]*.3</code></pre>
+<pre><code>##    count
+## 1: 287.4</code></pre>
+<p><strong>So our sample will consist of 288 records.</strong></p>
+<p><strong>Our Sharpe Null hypothesis is that there is a <span class="math inline">\(\tau\)</span> of no change, that is, <span class="math inline">\(H_A-H_0=0\)</span>, where <span class="math inline">\(H_A\)</span> refers to the success of getting a visa, and <span class="math inline">\(H_0\)</span> refers to not being successful in getting a visa. </strong></p>
+<p><strong>My proceedure will be the following:</strong> <strong>Create a function that: </strong> ** Randomly draw 288 records<strong> </strong> Stores in a vector the number of successes for each group<strong> </strong> calculate each group’s view mean.<strong> </strong> calculate ate-hat by subtracting loss from success<strong> </strong> store ate-hat into a vector**</p>
+<pre class="r"><code>#Create a function:
+run_study &lt;- function(){
+  # pull a sample &amp; store it in a vector
+  my_sample &lt;- as.data.table(sapply(dt[], sample, 288))
+  #return the number of successes
+  n_successes &lt;- my_sample[, .(count = .N), by=success]$count[1]
+  n_successes
+  #calculate ate-hat by subtracting sample mean loss from mean success
+  ate &lt;- my_sample[,.(mean = mean(views)),by = success]$mean[2] - my_sample[,.(mean = mean(views)),by = success]$mean[1]
+  #return ate-hat
+  ate
+  #my_sample
+}</code></pre>
+<pre class="r"><code>run_study()</code></pre>
+<pre><code>## [1] -0.06447876</code></pre>
+<p><strong>Now, let’s replicate the proceedure</strong></p>
+<pre class="r"><code>results &lt;- t(replicate(10000, run_study()))</code></pre>
 <ol start="3" style="list-style-type: lower-alpha">
-<li><p>How many of the simulated random assignments generate an estimated ATE that is at least as large as the actual estimate of the ATE?</p></li>
-<li><p>What is the implied <em>one-tailed</em> p-value?</p></li>
-<li><p>How many of the simulated random assignments generate an estimated ATE that is at least as large <em>in absolute value</em> as the actual estimate of the ATE?</p></li>
-<li><p>What is the implied two-tailed p-value?</p></li>
+<li>How many of the simulated random assignments generate an estimated ATE that is at least as large as the actual estimate of the ATE?</li>
 </ol>
+<pre class="r"><code>sum(results &gt;= true_ate)</code></pre>
+<pre><code>## [1] 613</code></pre>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>What is the implied <em>one-tailed</em> p-value?</li>
+</ol>
+<p><strong>We recall that we can get the p-value under the randomization inference framework, by examining hte precent of values that occur at a place that is smaller or larger than the p-value we observe by taking the mean of the true ATE and the distribution under the sharpe null. </strong></p>
+<pre class="r"><code>mean(true_ate &lt;results )</code></pre>
+<pre><code>## [1] 0.0613</code></pre>
+<p>We see that this is boarderline signficant at .055.</p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>How many of the simulated random assignments generate an estimated ATE that is at least as large <em>in absolute value</em> as the actual estimate of the ATE?</li>
+</ol>
+<pre class="r"><code>sum(abs(results) &gt;= true_ate)</code></pre>
+<pre><code>## [1] 1173</code></pre>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>What is the implied two-tailed p-value?</li>
+</ol>
+<p><strong>My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.</strong></p>
+<pre class="r"><code>mean(true_ate &lt;results )*2</code></pre>
+<pre><code>## [1] 0.1226</code></pre>
+<p><strong>.11 is not significant and means that we do not reject the Sharpe Null Hypothesis.</strong></p>
 </div>
 <div id="term-limits-arent-good." class="section level1">
 <h1>2. Term Limits Aren’t Good.</h1>

@@ -155,16 +155,29 @@ d <- read.dta("./data/Titiunik.2010.dta")
 head(d)
 ```
 
+```{r}
+#load it up into data table
+dt <- data.table(d)
+```
+
+
 a. Using either `dplyr` or `data.table`, group the data by state and report the mean number of bills introduced in each state. Does Texas or Arkansas seem to be more productive? Then, group by two- or four-year terms (ignoring states). Do two- or four-year terms seem to be more productive? **Which of these effects is causal, and which is not?** Finally, using `dplyr` or `data.table` to group by state and term-length. How, if at all, does this change what you learn? 
 
-```{r}
-
-```
-
+**Per the framework, we want to take dt, calculate the mean number of bills, grouped by state**
 
 ```{r}
-
+dt[,.(mean = mean(bills_introduced)),by = texas0_arkansas1]
 ```
+**From these results, we see that by taking the mean number of bills introduced in each state, Texas seems to be more productive with a mean of approximately 68.8 than Arkansas with a mean of approximately 25.5.**
+
+
+**Per the framework, we want to take dt again, calculate the mean number of bills, grouped by two- or four-year terms.**
+
+```{r}
+dt[,.(mean = mean(bills_introduced)),by = term2year]
+```
+
+**Finally, per the data table framework, we want to take dt again, calculate the mean number of bills grouped by state AND two- or four-year terms.**
 
 ```{r}
 
