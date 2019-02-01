@@ -387,14 +387,69 @@ SE_ATE
 
 ```
 
+```{r}
+print(c("treat var", treat_var, "control var", control_var, "cov", cov))
+```
+
+
+**Our standard error for this set of calculations is 10.61838.**
 
 b. Suppose that clusters are instead formed by grouping observations {1,14}, {2,13}, {3,12}, ... , {7,8}. Use equation (3.22) to calculate the standard error assuming half of the clusters are randomly assigned to treatment. 
 
-```{r} 
+```{r}
+#Similar to above, there are fourteen observations, so by matching them, we will get 7 clusters.  We will randomly select 3 clusters to get treatment and 3 to be the control.  One will be held-out because covariance must be calculated with similar-size matricies.
 
+#First lets see our sample (the first three for control, the last three for treatment)
+sample(x = 1:7, size = 6)
+```
+**We will pick clusters 6, 4, and 7 for control, and 2, 1, and 3 for treatment.**
+
+
+
+```{r} 
+treat <- dt[which(Village==6 | Village==9 | Village==4 | Village==11 | Village==7 | Village==8),,]
+control <- dt[which(Village==2 | Village==13 | Village==1 | Village==14 | Village==3 | Village==12),,] 
+
+
+c1 <- dt[which(Village==1 | Village==14),,]
+c2 <- dt[which(Village==2 | Village==13),,]
+c3 <- dt[which(Village==3 | Village==12),,]
+c4 <- dt[which(Village==4 | Village==11),,]
+c5 <- dt[which(Village==5 | Village==10),,]
+c6 <- dt[which(Village==6 | Village==9),,]
+c7 <- dt[which(Village==7 | Village==8),,]
 ``` 
 
+**Now that we have our treatment and control clusters grouped, we will now begin the calculations for the SE**
+
+```{r}
+#calculate variances:
+treat_var <- var(treat$Y)
+control_var <- var(control$D)
+
+#calculate covariance:
+cov <- cov(control$D,treat$Y)
+
+#Number of clusters
+k = 7
+#m:
+m <- 6
+#N-m
+N_m <-6
+
+SE_ATE <- sqrt(((1)/(k-1))*((m*control_var)/(N_m))+(((N_m)*control_var)/(m))+(2*cov))
+SE_ATE
+
+```
+```{r}
+print(c("treat var", treat_var, "control var", control_var, "cov", cov))
+```
+
+**Our standard error for this set of calculations is 11.12255.**
+
 c. Why do the two methods of forming clusters lead to different standard errors? What are the implications for the design of cluster randomized experiments? 
+
+**The first clustering had a lower standard error than the second clustering and my intuittion is that it because the first clustering had values that were more similar to eachother versus the second clustering, which was more random.  Perhaps if there is a smaller total variance, because the first clustering had a total treatment and control variance sum of 81.1 and the second clustering had a total treatment and control variance sum of 83.23 **
 
 # 4. Sell Phones? 
 You are an employee of a newspaper and are planning an experiment to demonstrate to Apple that online advertising on your website causes people to buy iPhones. Each site visitor shown the ad campaign is exposed to $0.10 worth of advertising for iPhones. (Assume all users could see ads.) There are 1,000,000 users available to be shown ads on your newspaper's website during the one week campaign. 
