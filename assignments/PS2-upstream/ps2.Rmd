@@ -328,11 +328,65 @@ Use the data in *Field Experiments* Table 3.3 to simulate cluster randomized ass
 d <- read.csv("./data/ggChapter3.csv", stringsAsFactors = FALSE)
 ```
 
+```{r}
+#datatable4eva
+dt <- data.table(d)
+dt
+```
+
+
 a. Suppose the clusters are formed by grouping observations {1,2}, {3,4}, {5,6}, ... , {13,14}. Use equation (3.22) to calculate the standard error assuming half of the clusters are randomly assigned to treatment. 
 
+**We recall that 3.22 says the following:**
+
+$SE(\hat{ATE})=\sqrt{\frac{1}{k-1}\left\{ \frac{mVar(Y_j(0))}{N-m}+\frac{(N-m)Var(Y_j(1))}{m}+2Cov(\bar{Y}_j(0),\bar{Y}_j(1)) \right\} }$
+
 ```{r} 
+#There are fourteen observations, so by matching them, we will get 7 clusters.  We will randomly select 3 clusters to get treatment and 3 to be the control.  One will be held-out because covariance must be calculated with similar-size matricies.
+
+#First lets see our sample (the first three for control, the last three for treatment)
+sample(x = 1:7, size = 6)
+```
+**We will pick clusters 3, 6, and 2 for control, and 1, 7, and 4 for treatment.**
+
+```{r}
+
+treat <- dt[which(Village==5 | Village==6 | Village==11 | Village==12 | Village==3 | Village==4),,]
+control <- dt[which(Village==1 | Village==2 | Village==13 | Village==14 | Village==7 | Village==8),,] 
+
+
+c1 <- dt[which(Village==1 | Village==2),,]
+c2 <- dt[which(Village==3 | Village==4),,]
+c3 <- dt[which(Village==5 | Village==6),,]
+c4 <- dt[which(Village==7 | Village==8),,]
+c5 <- dt[which(Village==9 | Village==10),,]
+c6 <- dt[which(Village==11 | Village==12),,]
+c7 <- dt[which(Village==13 | Village==14),,]
 
 ```
+
+**Now that we have our treatment and control clusters grouped, we will now begin the calculations for the SE**
+
+```{r}
+#calculate variances:
+treat_var <- var(treat$Y)
+control_var <- var(control$D)
+
+#calculate covariance:
+cov <- cov(control$D,treat$Y)
+
+#Number of clusters
+k = 7
+#m:
+m <- 6
+#N-m
+N_m <-6
+
+SE_ATE <- sqrt(((1)/(k-1))*((m*control_var)/(N_m))+(((N_m)*control_var)/(m))+(2*cov))
+SE_ATE
+
+```
+
 
 b. Suppose that clusters are instead formed by grouping observations {1,14}, {2,13}, {3,12}, ... , {7,8}. Use equation (3.22) to calculate the standard error assuming half of the clusters are randomly assigned to treatment. 
 
