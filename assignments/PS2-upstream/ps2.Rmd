@@ -176,23 +176,100 @@ dt[,.(mean = mean(bills_introduced)),by = texas0_arkansas1]
 ```{r}
 dt[,.(mean = mean(bills_introduced)),by = term2year]
 ```
+**From these results, we see that by taking the mean number of bills and grouping them by two years (1) or four years (0), four year terms (0) have a greater mean number of bills introduced in each state at approximately 53, versus two year terms (1) with a mean number of bills introduced of approximately 38.6.**
+
 
 **Finally, per the data table framework, we want to take dt again, calculate the mean number of bills grouped by state AND two- or four-year terms.**
 
 ```{r}
-
+dt[,.(mean = mean(bills_introduced)),by = list(texas0_arkansas1,term2year)]
 ```
 
+**From these data, we still see a similar story, though the data are more clear.  For the state of Texas, we see that there is still a greater mean number of bills (average approximately 76.9) introduced per legislator where term limits are four years (0), versus when term limits are two years (1) (average approximately 60.1).  Similarly, for the state of Arkansas, when term limits are four years (0), we observe a greater mean number of bills introduced by legislators (average approximately 30.7) versus when term limits are two years (1) (average approximately 20.6).  With these data, we can see that there is a general difference between the number of bills introduced by legislators in each state but also in context of the terms. **
 
 b. For each state, estimate the standard error of the estimated ATE. 
 
+
+# If we use 3.4:
+
+**For each state, we calculate the standard error of the estimated ATE by using the following equation, number 3.4 in the FE:**
+
+$SE(\hat{ATE})=\sqrt{\frac{1}{N-1}\left\{ \frac{mVar(Y_i(0))}{N-m}+\frac{(N-m)Var(Y_i(1))}{m}+2Cov(Y_i(0),Y_i(1)) \right\} }$
+
+
 ```{r}
+cov((dt[which(texas0_arkansas1==1 & term2year==0),,]$bills_introduced),(dt[which(texas0_arkansas1==1 & term2year==1),,]$bills_introduced))
+```
+
+
+```{r}
+AR_Y1 <- (dt[which(texas0_arkansas1==1 & term2year==1),,]$bills_introduced)
+AR_Y0 <- (dt[which(texas0_arkansas1==1 & term2year==0),,]$bills_introduced)
+TX_Y1 <- (dt[which(texas0_arkansas1==0 & term2year==1),,]$bills_introduced)
+TX_Y0 <- (dt[which(texas0_arkansas1==0 & term2year==0),,]$bills_introduced)
+
+#calculate variances:
+AR_var_Y1 <- var(AR_Y1)
+AR_var_Y0 <- var(AR_Y0)
+TX_var_Y1 <- var(TX_Y1)
+TX_var_Y0 <- var(TX_Y0)
+#calculate covariance:
+AR_cov <-0
+TX_cov <-0
 
 ```
 
-c. Use equation (3.10) to estimate the overall ATE for both states combined. 
+# If we use 3.12:
+
+$SE(\hat{ATE}) = \sqrt{(SE_1)^2(\frac{N_1}{N})^2+(SE_2)^2(\frac{N_2}{N})^2}$
+
+**And we calculate ** $\hat{SE} = \sqrt{\frac{\hat{Var(Y_i(0))}}{N-m}+\frac{\hat{Var(Y_i(1))}}{m}}$
+
+**Where M is the number of observations from the treatment group**
 
 ```{r}
+#Set up values:
+AR_Y1 <- (dt[which(texas0_arkansas1==1 & term2year==1),,]$bills_introduced)
+AR_Y0 <- (dt[which(texas0_arkansas1==1 & term2year==0),,]$bills_introduced)
+TX_Y1 <- (dt[which(texas0_arkansas1==0 & term2year==1),,]$bills_introduced)
+TX_Y0 <- (dt[which(texas0_arkansas1==0 & term2year==0),,]$bills_introduced)
+
+AR_Y1_n <- (dt[which(texas0_arkansas1==1 & term2year==1),.(count = .N),])
+AR_Y0_n <- (dt[which(texas0_arkansas1==1 & term2year==0),.(count = .N),])
+TX_Y1_n <- (dt[which(texas0_arkansas1==0 & term2year==1),.(count = .N),])
+TX_Y0_n <- (dt[which(texas0_arkansas1==0 & term2year==0),.(count = .N),])
+
+tot_obs <-dt[, .(count = .N),]
+
+##calculate variances:
+AR_var_Y1 <- var(AR_Y1)
+AR_var_Y0 <- var(AR_Y0)
+TX_var_Y1 <- var(TX_Y1)
+TX_var_Y0 <- var(TX_Y0)
+
+
+#Calculate AR Standard Error
+AR_SE <- sqrt(((AR_var_Y0)/(AR_Y0_n))+((AR_var_Y1)/(AR_Y1_n)))
+#Calculate TX Standard Error:
+TX_SE <- sqrt(((TX_var_Y0)/(TX_Y0_n))+((TX_var_Y1)/(TX_Y1_n)))
+```
+
+
+c. Use equation (3.10) to estimate the overall ATE for both states combined. 
+
+****
+
+$ATE = \sum_{j=1}^{J}\frac{N_j}{N}ATE_j$
+
+```{r}
+#Mean AR
+
+
+
+# Mean TX
+
+
+
 
 ```
 
@@ -200,8 +277,11 @@ d. Explain why, in this study, simply pooling the data for the two states and co
 
 e. Insert the estimated standard errors into equation (3.12) to estimate the stand error for the overall ATE. 
 
-```{r}
+$SE(\hat{ATE}) = \sqrt{(SE_1)^2(\frac{N_1}{N})^2+(SE_2)^2(\frac{N_2}{N})^2}$
 
+```{r}
+SE_ATE <- sqrt((AR_SE)^2*(AR_Y1_n+AR_Y0_n/tot_obs)^2+(AR_TX)^2*(TX_Y1_n+TX_Y0_n/tot_obs)^2)
+SE_ATE
 ```
 
 f. Use randomization inference to test the sharp null hypothesis that the treatment effect is zero for senators in both states. 
@@ -211,6 +291,8 @@ f. Use randomization inference to test the sharp null hypothesis that the treatm
 ``` 
 
 g. **IN Addition:** Plot histograms for both the treatment and control groups in each state (for 4 histograms in total).
+
+
 
 # 3. Cluster Randomization
 Use the data in *Field Experiments* Table 3.3 to simulate cluster randomized assignment. (*Notes: (a) Assume 3 clusters in treatment and 4 in control; and (b) When Gerber and Green say ``simulate'', they do not mean ``run simulations with R code'', but rather, in a casual sense ``take a look at what happens if you do this this way.'' There is no randomization inference necessary to complete this problem.*)
