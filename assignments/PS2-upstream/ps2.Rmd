@@ -449,7 +449,7 @@ print(c("treat var", treat_var, "control var", control_var, "cov", cov))
 
 c. Why do the two methods of forming clusters lead to different standard errors? What are the implications for the design of cluster randomized experiments? 
 
-**The first clustering had a lower standard error than the second clustering and my intuittion is that it because the first clustering had values that were more similar to eachother versus the second clustering, which was more random.  Perhaps if there is a smaller total variance, because the first clustering had a total treatment and control variance sum of 81.1 and the second clustering had a total treatment and control variance sum of 83.23 **
+**The first clustering had a lower standard error than the second clustering and my intuittion is that it because the first clustering had values that were more similar to eachother versus the second clustering, which was more random.  Perhaps if there is a smaller total variance, because the first clustering had a total treatment and control variance sum of 81.1 and the second clustering had a total treatment and control variance sum of 83.23.**
 
 # 4. Sell Phones? 
 You are an employee of a newspaper and are planning an experiment to demonstrate to Apple that online advertising on your website causes people to buy iPhones. Each site visitor shown the ad campaign is exposed to $0.10 worth of advertising for iPhones. (Assume all users could see ads.) There are 1,000,000 users available to be shown ads on your newspaper's website during the one week campaign. 
@@ -458,9 +458,41 @@ Apple indicates that they make a profit of $100 every time an iPhone sells and t
 
 a. By how much does the ad campaign need to increase the probability of purchase in order to be "worth it" and a positive ROI (supposing there are no long-run effects and all the effects are measured within that week)?
 
+**Profit = Revenue - Costs**
+
+```{r}
+#Cost:
+cpi <- .1
+users <- 1000000
+Ad_spend <- users *cpi
+Ad_spend
+```
+
+**Adspend right now is 100K**
+
+```{r}
+#Revenue:
+conversion <-.005
+unit_profit <-100
+revenue <- users * conversion * unit_profit
+revenue
+```
+
+**If shown to all users, at the current metrics, the revenue is 500K.  To calculate profit, we subtract cost (adspend) from revenue, that is, 500K-100K is 400K profit. **
+
+**To calculate breakeven, let' set up an algebra equation**
+
+$users*conversion*unit_profit-(cpi * users)=0$
+$users*.005*100-(.1*users)=0$
+$users*.5-(.1*users)=0$
+$.5*users=.1 users$ 
+
+
 ```{r}
 
 ```
+
+
 
 b. Assume the measured effect is 0.2 percentage points. If users are split 50:50 between the treatment group (exposed to iPhone ads) and control group (exposed to unrelated advertising or nothing; something you can assume has no effect), what will be the confidence interval of your estimate on whether people purchase the phone?
 
