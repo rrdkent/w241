@@ -277,6 +277,8 @@ tot_ATE
 
 d. Explain why, in this study, simply pooling the data for the two states and comparing the average number of bills introduced by two-year senators to the average number of bills introduced by four-year senators leads to biased estimate of the overall ATE. 
 
+**Pooling the data from the two states introduced by two-year senators compared to four-year senators leads to a biased estimate of the overall ATE chiefly because each state has different treatment effects and **
+
 e. Insert the estimated standard errors into equation (3.12) to estimate the stand error for the overall ATE. 
 
 $SE(\hat{ATE}) = \sqrt{(SE_1)^2(\frac{N_1}{N})^2+(SE_2)^2(\frac{N_2}{N})^2}$
@@ -289,11 +291,32 @@ SE_ATE
 f. Use randomization inference to test the sharp null hypothesis that the treatment effect is zero for senators in both states. 
 
 ```{r}
-
+run_study <- function(state, grp){
+  # pull a sample & store it in a vector.  I'm choosing samples of 10.
+  my_sample <- as.data.table(sapply((dt[which(texas0_arkansas1==state),,]), sample, 10))
+  #calculate ate-hat by subtracting sample mean loss from mean success
+  ate <- my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[2] - my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[1]
+  #return ate-hat
+  ate
+  #my_sample
+}
 ``` 
+
+
+```{r}
+AR_Y1_results <- t(replicate(1000, run_study(1,1)))
+AR_Y0_results <- t(replicate(1000, run_study(1,0)))
+TX_Y1_results <- t(replicate(1000, run_study(0,1)))
+TX_Y0_results <- t(replicate(1000, run_study(0,0)))
+```
+
 
 g. **IN Addition:** Plot histograms for both the treatment and control groups in each state (for 4 histograms in total).
 
+```{r}
+x2 <- na.omit(AR_Y1_results)
+plot(density(AR_Y1_results))
+```
 
 
 # 3. Cluster Randomization
