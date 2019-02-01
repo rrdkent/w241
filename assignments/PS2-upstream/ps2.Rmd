@@ -239,6 +239,9 @@ AR_Y0_n <- (dt[which(texas0_arkansas1==1 & term2year==0),.(count = .N),])
 TX_Y1_n <- (dt[which(texas0_arkansas1==0 & term2year==1),.(count = .N),])
 TX_Y0_n <- (dt[which(texas0_arkansas1==0 & term2year==0),.(count = .N),])
 
+
+tot_obs_AR <- AR_Y1_n+AR_Y0_n
+tot_obs_TX <- TX_Y1_n+TX_Y0_n
 tot_obs <-dt[, .(count = .N),]
 
 ##calculate variances:
@@ -262,14 +265,13 @@ c. Use equation (3.10) to estimate the overall ATE for both states combined.
 $ATE = \sum_{j=1}^{J}\frac{N_j}{N}ATE_j$
 
 ```{r}
-#Mean AR
 
+AR_ATE <- mean(AR_Y1)-mean(AR_Y0)
+TX_ATE <- mean(TX_Y1)-mean(TX_Y0)
 
+tot_ATE <- sum((tot_obs_AR/tot_obs)*AR_ATE, (tot_obs_TX/tot_obs)*TX_ATE)
 
-# Mean TX
-
-
-
+tot_ATE
 
 ```
 
