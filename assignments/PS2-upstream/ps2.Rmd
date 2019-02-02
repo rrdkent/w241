@@ -558,14 +558,15 @@ c. Regression on a binary treatment variable turns out to give one the same answ
 
 ```{r}
 
-t.test(dt[,,]$bid ~ dt[,,]$uniform_price_auction, mu=0, alt="two.sided", conf=0.95)
+t_test <- t.test(dt[,,]$bid ~ dt[,,]$uniform_price_auction, mu=0, alt="two.sided", conf=0.95)
 
+t_test
 ```
 
 d. Calculate the 95% confidence interval you get from the regression.
 
 ```{r}
-
+t_test$conf.int
 ```
 
 e. On to p-values. What p-value does the regression report? Note: please use two-tailed tests for the entire problem.
