@@ -114,6 +114,8 @@ c. How many of the simulated random assignments generate an estimated ATE that i
 sum(results >= true_ate)
 ```
 
+**520 of the simulated random assignments generated an estimated ATE that is at least as large as the actual estimate of the ATE.**
+
 d. What is the implied *one-tailed* p-value? 
 
 **We recall that we can get the p-value under the randomization inference framework, by examining hte precent of values that occur at a place that is smaller or larger than the p-value we observe by taking the mean of the true ATE and the distribution under the sharpe null. **
@@ -130,6 +132,8 @@ e. How many of the simulated random assignments generate an estimated ATE that i
 sum(abs(results) >= true_ate)
 ```
 
+**1099 random assignments are at least as large in aboslute value as the actual estimate of the ATE.**
+
 f. What is the implied two-tailed p-value? 
 
 **My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.**
@@ -138,7 +142,7 @@ f. What is the implied two-tailed p-value?
 mean(true_ate <results )*2
 ```
 
-**.11 is not significant and means that we do not reject the Sharpe Null Hypothesis.**
+**0.11 is not significant and means that we do not reject the Sharpe Null Hypothesis.**
 
 # 2. Term Limits Aren't Good. 
 
@@ -282,7 +286,7 @@ tot_ATE
 
 d. Explain why, in this study, simply pooling the data for the two states and comparing the average number of bills introduced by two-year senators to the average number of bills introduced by four-year senators leads to biased estimate of the overall ATE. 
 
-**Pooling the data from the two states introduced by two-year senators compared to four-year senators leads to a biased estimate of the overall ATE chiefly because each state has different treatment effects and **
+**Intuitively, I would have suspected, ceteris parabus, that there would not be any affect on the overall ATE.  But thinking about it futher, perhaps pooling the data from the two states introduced by two-year senators compared to four-year senators leads to a biased estimate of the overall ATE chiefly because each state has different magnitudes of effects and combining them muddles the overall ATE as each state is clearly different (with Arkansas having a significantly lower base-line of bills introduced).  **
 
 e. Insert the estimated standard errors into equation (3.12) to estimate the stand error for the overall ATE. 
 
@@ -613,22 +617,12 @@ t_test <- t.test(dt[,,]$bid ~ dt[,,]$uniform_price_auction, mu=0, alt="two.sided
 t_test
 ```
 
-```{r}
-fit <- lm(dt[,,]$bid ~ dt[,,]$uniform_price_auction)
-fit_sum <- summary(fit)
-```
-
 
 d. Calculate the 95% confidence interval you get from the regression.
 
 ```{r}
 t_test$conf.int
 ```
-
-```{r}
-confint(fit, dt[,,]$uniform_price_auction, level=0.95)
-```
-
 
 e. On to p-values. What p-value does the regression report? Note: please use two-tailed tests for the entire problem.
 
