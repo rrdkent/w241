@@ -122,7 +122,7 @@ d. What is the implied *one-tailed* p-value?
 mean(true_ate <results )
 ```
 
-We see that this is boarderline signficant at .055.
+**We see that this is boarderline signficant at .055.**
 
 e. How many of the simulated random assignments generate an estimated ATE that is at least as large *in absolute value* as the actual estimate of the ATE? 
 
@@ -258,7 +258,7 @@ TX_SE <- sqrt(((TX_var_Y0)/(TX_Y0_n))+((TX_var_Y1)/(TX_Y1_n)))
 print(c("Arkansas Standard Error", AR_SE, "Texas Standard Error", TX_SE))
 ```
 
-
+**Arkansas's standard error is approximately 3.4 and Texas's standard error is approixmately 9.35.**
 
 c. Use equation (3.10) to estimate the overall ATE for both states combined. 
 
@@ -277,6 +277,9 @@ tot_ATE
 
 ```
 
+**The estimated overall ATE for both states combined is approximately -13.22.**
+
+
 d. Explain why, in this study, simply pooling the data for the two states and comparing the average number of bills introduced by two-year senators to the average number of bills introduced by four-year senators leads to biased estimate of the overall ATE. 
 
 **Pooling the data from the two states introduced by two-year senators compared to four-year senators leads to a biased estimate of the overall ATE chiefly because each state has different treatment effects and **
@@ -290,10 +293,22 @@ SE_ATE <- sqrt((AR_SE)^2*(AR_Y1_n+AR_Y0_n/tot_obs)^2+(AR_TX)^2*(TX_Y1_n+TX_Y0_n/
 SE_ATE
 ```
 
+**After, inserting the estimated standard errors into equation (3.12) to estimate the standard error for the overall ATE, we get a standard error of approximately 155.36.**
+
 f. Use randomization inference to test the sharp null hypothesis that the treatment effect is zero for senators in both states. 
 
+**Our Sharpe Null hypothesis is that there is a $\tau$ of no change, that is, $H_A-H_0=0$, where $H_A$ refers to the reduction of a senator's term to 2 years, and $H_0$ refers to maintaining the senator's term to 4 years..  **
+
+**My proceedure will be the following:**
+**Create a function that: **
+**  Randomly draw 10 records**
+**  Stores in a vector the number of successes for each group**
+**  calculate each group's mean.**
+**  calculate ate-hat by subtracting control mean from treatment mean**
+**  store ate-hat into a vector**
+****
 ```{r}
-run_study <- function(state, grp){
+run_study <- function(state){
   # pull a sample & store it in a vector.  I'm choosing samples of 10.
   my_sample <- as.data.table(sapply((dt[which(texas0_arkansas1==state),,]), sample, 10))
   #calculate ate-hat by subtracting sample mean loss from mean success
@@ -304,19 +319,54 @@ run_study <- function(state, grp){
 }
 ``` 
 
+```{r}
+run_study(0)
+```
+
+
+**Now, let's replicate each experiment 1000 times.**
 
 ```{r}
-AR_Y1_results <- t(replicate(1000, run_study(1,1)))
-AR_Y0_results <- t(replicate(1000, run_study(1,0)))
-TX_Y1_results <- t(replicate(1000, run_study(0,1)))
-TX_Y0_results <- t(replicate(1000, run_study(0,0)))
+AR_results <- t(replicate(1000, run_study(1)))
+TX_results <- t(replicate(1000, run_study(0)))
+```
+
+```{r}
+hist(TX_results)
+```
+
+
+**Now let's calculate the true ATE for Texas and True ATE for Arkansas:**
+
+```{r}
+TX_true_ATE <- dt[which(texas0_arkansas1==0 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==0 & term2year==0),.(mean(bills_introduced)),]
+TX_true_ATE
+```
+
+```{r}
+AR_true_ATE <- dt[which(texas0_arkansas1==1 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==1 & term2year==0),.(mean(bills_introduced)),]
+AR_true_ATE
+```
+
+To test the Sharp null, we calculate the implied two-tailed p-value to see if we can reject or accept the null.
+
+**My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.**
+
+```{r}
+TX_p_val <-mean(TX_true_ATE < TX_results )*2
+TX_p_val
+```
+
+```{r}
+AR_p_val <-mean(AR_true_ATE < AR_results )*2
+AR_p_val
 ```
 
 
 g. **IN Addition:** Plot histograms for both the treatment and control groups in each state (for 4 histograms in total).
 
+
 ```{r}
-x2 <- na.omit(AR_Y1_results)
 plot(density(AR_Y1_results))
 ```
 
@@ -563,23 +613,139 @@ t_test <- t.test(dt[,,]$bid ~ dt[,,]$uniform_price_auction, mu=0, alt="two.sided
 t_test
 ```
 
+```{r}
+fit <- lm(dt[,,]$bid ~ dt[,,]$uniform_price_auction)
+fit_sum <- summary(fit)
+```
+
+
 d. Calculate the 95% confidence interval you get from the regression.
 
 ```{r}
 t_test$conf.int
 ```
 
+```{r}
+confint(fit, dt[,,]$uniform_price_auction, level=0.95)
+```
+
+
 e. On to p-values. What p-value does the regression report? Note: please use two-tailed tests for the entire problem.
 
 ```{r}
-
+t_test$p.value
 ```
 
 f. Now compute the same p-value using randomization inference.
 
 ```{r}
+#Calculate Sample size, 30% of total.
+dt[,.N,]*.3
+```
+
+
+**Our Sharpe Null hypothesis is that there is a $\tau$ of no change, that is, $H_A-H_0=0$, where $H_A$ refers to price of a card in a uniform auction, and $H_0$ refers to price of a card i a non-uniform auction.  **
+
+**My proceedure will be the following:**
+**Create a function that: **
+**  Randomly draw 21 records**
+**  calculate each group's view mean.**
+**  calculate ate-hat by subtracting the mean of the control from the mean of the treatment **
+**  store ate-hat into a vector**
+
+```{r}
+dt[,.(mean = mean(bid)),by = uniform_price_auction]
+```
+
+
+```{r}
+#Create a function:
+run_study <- function(){
+  # pull a sample & store it in a vector
+  my_sample <- as.data.table(sapply(dt[], sample, 21))
+  #calculate ate-hat by subtracting sample mean non-uniform price auction from mean uniform price auction
+  ate <- my_sample[,.(mean = mean(bid)),by = uniform_price_auction]$mean[1] - my_sample[,.(mean = mean(bid)),by = uniform_price_auction]$mean[2]
+  #return ate-hat
+  ate
+  #my_sample
+}
+```
+
+```{r}
+run_study()
+```
+**Now, let's replicate the proceedure**
+
+```{r}
+results <- t(replicate(1000, run_study()))
+```
+
+```{r}
+#let's see what the distribution looks like.
+hist(results)
+```
+
+**And where is our mean in this distribution?**
+```{r}
+mean(results)
+```
+
+**Now let's calculate the true ATE for this sample:**
+
+
+**Let's Calculate the one-tailed p-value**
+```{r}
+#True ATE:
+#use data.table to get just the mean of the uniform price auction data (treatment):
+
+#convert to datatable, take the datatable, calculate the mean grouped by uniform price auction:
+
+dt <-data.table(d2)
+
+treat_mean <- dt[,.(mean = mean(bid)),by=uniform_price_auction]$mean[1]
+
+#and now the non-uniform price auction (control):
+
+control_mean <- dt[,.(mean = mean(bid)),by=uniform_price_auction]$mean[2]
+
+#to get the True_ate, we subtract the control mean from the treatment mean:
+
+true_ate <- treat_mean - control_mean
+true_ate
 
 ```
+
+```{r}
+dt[,.(mean = mean(bid)),by=uniform_price_auction]
+```
+
+**Interesting, under the treatement of a uniform price auction, we see that the actual treatment effect is negative, that is cards in a uniform price auction sell for, on average, less than in a non-uniform price auction.**
+
+**Well, this is somewhat confusing.  Because our true-ATE has a negative average treatment effect of approximately -12.21, versus our mean treatment effect for our randomized inference sampling is approximately positive .34.**
+
+**We may now ask ourselves, how many of the simulated random assignments generate an estimated ATE that is at least as large as the actual estimate of the ATE? **
+
+```{r}
+sum(results >= true_ate)
+```
+
+
+**We recall that we can get the p-value under the randomization inference framework, by examining the percent of values that occur at a place that is smaller or larger than the p-value we observe by taking the mean of the true ATE and the distribution under the sharpe null. **
+
+```{r}
+mean(true_ate < results )
+```
+
+**This is an insanely high one-tailed p-value.  What's going on?  It's going to be nuts to calculate the two-tailed p-value.**
+
+
+**My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.**
+
+```{r}
+mean(true_ate < results )*2
+```
+
+**Uh oh**
 
 g. Compute the same p-value again using analytic formulas for a two-sample t-test from your earlier statistics course. (Also see part (a).)
 
