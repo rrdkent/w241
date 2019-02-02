@@ -255,7 +255,9 @@ TX_var_Y0 <- var(TX_Y0)
 AR_SE <- sqrt(((AR_var_Y0)/(AR_Y0_n))+((AR_var_Y1)/(AR_Y1_n)))
 #Calculate TX Standard Error:
 TX_SE <- sqrt(((TX_var_Y0)/(TX_Y0_n))+((TX_var_Y1)/(TX_Y1_n)))
+print(c("Arkansas Standard Error", AR_SE, "Texas Standard Error", TX_SE))
 ```
+
 
 
 c. Use equation (3.10) to estimate the overall ATE for both states combined. 
@@ -522,7 +524,31 @@ In this experiment, the experimenters invited consumers at a sports card trading
 
 a. Compute a 95% confidence interval for the difference between the treatment mean and the control mean, using analytic formulas for a two-sample t-test from your earlier statistics course. 
 
+**For this problem, our treatment is a uniform price auction (1) and the control is a non-uniform price auction (0)**
+
 ```{r}
+#use data.table to get just the uniform price auction data (treatment):
+
+#convert to datatable, take the datatable, calculate the mean grouped by uniform price auction:
+
+dt <-data.table(d2)
+treat_mean <- dt[,.(mean = mean(bid)),by=uniform_price_auction]$mean[1]
+
+#and now the non-uniform price auction (control):
+
+control_mean <- dt[,.(mean = mean(bid)),by=uniform_price_auction]$mean[2]
+
+t.test(treat_mean ~ control_mean, mu=0, alt="two.sided", conf=0.95)
+
+---------
+#convert to datatable, take the datatable, where unform price auction is one
+
+dt <-data.table(d2)
+treat_vector <- dt[uniform_price_auction == 1,,]$bid
+
+#and now the non-uniform price auction (control):
+
+control_vector <- dt[uniform_price_auction == 0,,]$bid
 
 ```
 
@@ -531,6 +557,8 @@ b. In plain language, what does this confidence interval mean?
 c. Regression on a binary treatment variable turns out to give one the same answer as the standard analytic formula you just used.  Demonstrate this by regressing the bid on a binary variable equal to 0 for the control auction and 1 for the treatment auction.
 
 ```{r}
+
+t.test(dt[,,]$bid ~ dt[,,]$uniform_price_auction, mu=0, alt="two.sided", conf=0.95)
 
 ```
 
