@@ -389,7 +389,7 @@ a. Suppose the clusters are formed by grouping observations {1,2}, {3,4}, {5,6},
 $SE(\hat{ATE})=\sqrt{\frac{1}{k-1}\left\{ \frac{mVar(Y_j(0))}{N-m}+\frac{(N-m)Var(Y_j(1))}{m}+2Cov(\bar{Y}_j(0),\bar{Y}_j(1)) \right\} }$
 
 ```{r} 
-#There are fourteen observations, so by matching them, we will get 7 clusters.  We will randomly select 3 clusters to get treatment and 3 to be the control.  One will be held-out because covariance must be calculated with similar-size matricies.
+#There are fourteen observations, so by matching them, we will get 7 clusters.  We will randomly select 3 clusters to get treatment and 3 to be the control.  One will be held-out and get to relax with a frothy beverage because covariance must be calculated with similar-size matricies.
 
 #First lets see our sample (the first three for control, the last three for treatment)
 sample(x = 1:7, size = 6)
@@ -444,7 +444,7 @@ print(c("treat var", treat_var, "control var", control_var, "cov", cov))
 b. Suppose that clusters are instead formed by grouping observations {1,14}, {2,13}, {3,12}, ... , {7,8}. Use equation (3.22) to calculate the standard error assuming half of the clusters are randomly assigned to treatment. 
 
 ```{r}
-#Similar to above, there are fourteen observations, so by matching them, we will get 7 clusters.  We will randomly select 3 clusters to get treatment and 3 to be the control.  One will be held-out because covariance must be calculated with similar-size matricies.
+#Similar to above, there are fourteen observations, so by matching them, we will get 7 clusters.  We will randomly select 3 clusters to get treatment and 3 to be the control.  One will be held-out again because covariance must be calculated with similar-size matricies.
 
 #First lets see our sample (the first three for control, the last three for treatment)
 sample(x = 1:7, size = 6)
@@ -574,30 +574,26 @@ a. Compute a 95% confidence interval for the difference between the treatment me
 ```{r}
 #use data.table to get just the uniform price auction data (treatment):
 
-#convert to datatable, take the datatable, calculate the mean grouped by uniform price auction:
-
 dt <-data.table(d2)
-treat_mean <- dt[,.(mean = mean(bid)),by=uniform_price_auction]$mean[1]
+treatment <- dt[uniform_price_auction == 1,,]
 
 #and now the non-uniform price auction (control):
 
-control_mean <- dt[,.(mean = mean(bid)),by=uniform_price_auction]$mean[2]
-
-t.test(treat_mean ~ control_mean, mu=0, alt="two.sided", conf=0.95)
-
----------
-#convert to datatable, take the datatable, where unform price auction is one
-
-dt <-data.table(d2)
-treat_vector <- dt[uniform_price_auction == 1,,]$bid
-
-#and now the non-uniform price auction (control):
-
-control_vector <- dt[uniform_price_auction == 0,,]$bid
-
+control <- dt[uniform_price_auction == 0,,]
 ```
 
+```{r}
+t_test <- t.test( control, treatment, conf=0.95)
+t_test
+```
+```{r}
+t_test$conf.int
+```
+ **Our 95% confidence interval is approximately -0.21 and approximately 11.42.**
+ 
 b. In plain language, what does this confidence interval mean?
+
+
 
 c. Regression on a binary treatment variable turns out to give one the same answer as the standard analytic formula you just used.  Demonstrate this by regressing the bid on a binary variable equal to 0 for the control auction and 1 for the treatment auction.
 
@@ -735,7 +731,8 @@ mean(true_ate < results )*2
 g. Compute the same p-value again using analytic formulas for a two-sample t-test from your earlier statistics course. (Also see part (a).)
 
 ```{r}
-
+t_test$p.value
 ```
+**The P-value we get from our t-test is approximately .0588, meaning that it is marginally signficant.**
 
 h. Compare the two p-values in parts (e) and (f). Are they much different? Why or why not? How might your answer to this question change if the sample size were different?
