@@ -273,7 +273,7 @@ f. Use randomization inference to test the sharp null hypothesis that the treatm
 
 **My proceedure will be the following:**
 **Create a function that: **
-**  Randomly draw 10 records**
+**  Randomly draw 18 records**
 **  Stores in a vector the number of successes for each group**
 **  calculate each group's mean.**
 **  calculate ate-hat by subtracting control mean from treatment mean**
@@ -281,18 +281,20 @@ f. Use randomization inference to test the sharp null hypothesis that the treatm
 ****
 ```{r}
 run_study <- function(state){
-  # pull a sample & store it in a vector.  I'm choosing samples of 10.
-  my_sample <- as.data.table(sapply((dt[which(texas0_arkansas1==state),,]), sample, 10))
+  # pull a sample & store it in a vector.  I'm choosing samples of 18.
+  my_sample <- as.data.table(sapply((dt[which(texas0_arkansas1==state),,]), sample, 18))
   #calculate ate-hat by subtracting sample mean loss from mean success
-  ate <- my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[2] - my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[1]
+  ate_hat <- my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[2] - my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[1]
   #return ate-hat
-  ate
-  #my_sample
+  ate_hat
 }
 ``` 
 
 ```{r}
 run_study(0)
+```
+```{r}
+dt[,.(mean = mean(bills_introduced)),by = term2year]$mean[2] - dt[,.(mean = mean(bills_introduced)),by = term2year]$mean[1]
 ```
 
 
@@ -304,40 +306,47 @@ TX_results <- t(replicate(1000, run_study(0)))
 ```
 
 ```{r}
-hist(TX_results)
+plot(density(TX_results))
 ```
 
 ```{r}
-hist(AR_results)
+plot(density(AR_results))
 ```
 
 
 **Now let's calculate the true ATE for Texas and True ATE for Arkansas:**
 
 ```{r}
-TX_true_ATE <- dt[which(texas0_arkansas1==0 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==0 & term2year==0),.(mean(bills_introduced)),]
+TX_true_ATE <- (dt[which(texas0_arkansas1==0 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==0 & term2year==0),.(mean(bills_introduced)),])$V1
 TX_true_ATE
 ```
 **Our true ATE for Texas is approximately -16.74.**
 
 
 ```{r}
-AR_true_ATE <- dt[which(texas0_arkansas1==1 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==1 & term2year==0),.(mean(bills_introduced)),]
+AR_true_ATE <-(dt[which(texas0_arkansas1==1 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==1 & term2year==0),.(mean(bills_introduced)),])$V1
 AR_true_ATE
 ```
 **Our true ATE for Arkansas is approximately -10.1.**
 
 To test the Sharp null, we calculate the implied two-tailed p-value to see if we can reject or accept the null.
 
-**My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.**
+**Now we calculate the P-Value**
 
 ```{r}
-TX_p_val <-mean(TX_true_ATE < TX_results )*2
+TX_true_ATE$[1] > TX_results
+
+```
+
+
+
+```{r}
+TX_p_val <-mean(TX_true_ATE < TX_results )
 TX_p_val
 ```
 
 ```{r}
-AR_p_val <-mean(AR_true_ATE < AR_results )*2
+AR_p_val <-mean(AR_true_ATE < AR_results )
 AR_p_val
 ```
 
