@@ -345,7 +345,53 @@ AR_p_val <-mean(AR_true_ATE > AR_results )
 AR_p_val
 ```
 
+
 **However, with Arkansas, we get a p-value of .02 which is statistically significant, meaning that we can reject the Sharp null hypothesis of no average treatment effect leading us to conclude that there is an average treatment effect. **
+
+
+**What if we do it as a proportion?**
+
+```{r}
+true_ate_prop <- TX_p_val*(tot_obs_TX/tot_obs) + AR_p_val*(tot_obs_AR/tot_obs)
+true_ate_prop
+
+```
+
+**If done as a proportion, we get a p-value of approximately .08, which is marginally significant.**
+
+**What if we run the sampling together?**
+
+```{r}
+#Run combined study
+
+run_comb_study <- function(){
+  # pull a sample & store it in a vector.  I'm choosing samples of 18.
+  my_sample <- as.data.table(sapply((dt[,,]), sample, 18))
+  #calculate ate-hat by subtracting sample mean loss from mean success
+  ate_hat <- my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[2] - my_sample[,.(mean = mean(bills_introduced)),by = term2year]$mean[1]
+  #return ate-hat
+  ate_hat
+}
+
+```
+```{r}
+run_comb_study()
+```
+
+```{r}
+comb_study <- t(replicate(1000, run_comb_study()))
+```
+
+
+```{r}
+plot(density(comb_study))
+```
+
+```{r}
+mean(tot_ATE > comb_study )
+```
+
+**Taken together, with a p-value of approximately 0.18, we cannot reject the Sharp null hypothesis for Texas, i.e. there is no average treatment effect.**
 
 g. **IN Addition:** Plot histograms for both the treatment and control groups in each state (for 4 histograms in total).
 
@@ -505,7 +551,37 @@ Apple indicates that they make a profit of $100 every time an iPhone sells and t
 
 a. By how much does the ad campaign need to increase the probability of purchase in order to be "worth it" and a positive ROI (supposing there are no long-run effects and all the effects are measured within that week)?
 
-**Profit = Revenue - Costs**
+
+<!-- Carson Says:
+Basically the two questions you need to answer are how much is being spent on ads currently
+and how does an increase in purchase probability change the amount of profit taking in
+I think answering the first of the above should help you clarify the problem
+see if you can construct the equation: ad cost = lift in profit
+(you might have a version of that above, but I'm not quite following what you have there)
+
+!-->
+
+
+
+
+**Currently Apple is spending nothing, but makes **
+
+
+**From the perspective of Apple**
+
+$users*conversionrate*unit_profit-(cpi * users)=0$
+$1000000*conversionrate*100-(.1*1000000)=0$
+$1000000*conversionrate*100-(100000)=0$
+$1000000*conversionrate*100=100000$
+$1000000*conversionrate=1000$
+$conversionrate = .001$
+
+
+**Profit per user = Revenue per user - Costs per user**
+
+**Cost (per user) = $0.10**
+
+**Revenue (per user) = $100 * .001 % = $0.10**
 
 ```{r}
 #Cost:
@@ -519,7 +595,7 @@ Ad_spend
 
 ```{r}
 #Revenue:
-conversion <-.005
+conversion <-.001
 unit_profit <-100
 revenue <- users * conversion * unit_profit
 revenue
@@ -527,12 +603,14 @@ revenue
 
 **If shown to all users, at the current metrics, the revenue is 500K.  To calculate profit, we subtract cost (adspend) from revenue, that is, 500K-100K is 400K profit. **
 
-**To calculate breakeven, let' set up an algebra equation**
+**To calculate the breakeven conversion rate, let' set up an algebra equation**
 
-$users*conversion*unit_profit-(cpi * users)=0$
-$users*.005*100-(.1*users)=0$
-$users*.5-(.1*users)=0$
-$.5*users=.1 users$ 
+$users*conversionrate*unit_profit-(cpi * users)=0$
+$1000000*conversionrate*100-(.1*1000000)=0$
+$1000000*conversionrate*100-(100000)=0$
+$1000000*conversionrate*100=100000$
+$1000000*conversionrate=1000$
+$conversionrate = .001$
 
 
 ```{r}
@@ -552,6 +630,8 @@ b. Assume the measured effect is 0.2 percentage points. If users are split 50:50
 c. Is this confidence interval precise enough that you would recommend running this experiment? Why or why not?
 
 d. Your boss at the newspaper, worried about potential loss of revenue, says he is not willing to hold back a control group any larger than 1% of users. What would be the width of the confidence interval for this experiment if only 1% of users were placed in the control group?
+
+
 
 ```{r}
 
@@ -598,23 +678,28 @@ b. In plain language, what does this confidence interval mean?
 c. Regression on a binary treatment variable turns out to give one the same answer as the standard analytic formula you just used.  Demonstrate this by regressing the bid on a binary variable equal to 0 for the control auction and 1 for the treatment auction.
 
 ```{r}
-
-t_test <- t.test(dt[,,]$bid ~ dt[,,]$uniform_price_auction, mu=0, alt="two.sided", conf=0.95)
-
-t_test
+fit <- lm(treatment$bid ~ control$bid, data=dt )
 ```
 
+```{r}
+linear_model <- summary(fit)
+linear_model
+```
 
 d. Calculate the 95% confidence interval you get from the regression.
 
 ```{r}
-t_test$conf.int
+coeff <- linear_model$coefficients[2, 1]
+stand_error <- regression$coefficients[2, 2]
+lower_bound <- coeff - stand_error * 1.96
+upper_bound <- coeff + stand_error * 1.96
+print(c("Confidence Intervial", lower_bound, "to", upper_bound))
 ```
 
 e. On to p-values. What p-value does the regression report? Note: please use two-tailed tests for the entire problem.
 
 ```{r}
-t_test$p.value
+(1-linear_model$coefficients[2,4])*2
 ```
 
 f. Now compute the same p-value using randomization inference.
@@ -663,17 +748,13 @@ results <- t(replicate(1000, run_study()))
 
 ```{r}
 #let's see what the distribution looks like.
-hist(results)
+plot(density(results))
 ```
 
 **And where is our mean in this distribution?**
 ```{r}
 mean(results)
 ```
-
-**Now let's calculate the true ATE for this sample:**
-
-
 **Let's Calculate the one-tailed p-value**
 ```{r}
 #True ATE:
@@ -702,28 +783,18 @@ dt[,.(mean = mean(bid)),by=uniform_price_auction]
 
 **Interesting, under the treatement of a uniform price auction, we see that the actual treatment effect is negative, that is cards in a uniform price auction sell for, on average, less than in a non-uniform price auction.**
 
-**Well, this is somewhat confusing.  Because our true-ATE has a negative average treatment effect of approximately -12.21, versus our mean treatment effect for our randomized inference sampling is approximately positive .34.**
-
-**We may now ask ourselves, how many of the simulated random assignments generate an estimated ATE that is at least as large as the actual estimate of the ATE? **
-
-```{r}
-sum(results >= true_ate)
-```
-
-
 **We recall that we can get the p-value under the randomization inference framework, by examining the percent of values that occur at a place that is smaller or larger than the p-value we observe by taking the mean of the true ATE and the distribution under the sharpe null. **
 
 ```{r}
-mean(true_ate < results )
+1- mean(true_ate < results)
 ```
 
-**This is an insanely high one-tailed p-value.  What's going on?  It's going to be nuts to calculate the two-tailed p-value.**
 
 
 **My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.**
 
 ```{r}
-mean(true_ate < results )*2
+(1- mean(true_ate < results))*2
 ```
 
 **Uh oh**
