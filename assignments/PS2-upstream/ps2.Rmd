@@ -193,43 +193,9 @@ dt[,.(mean = mean(bills_introduced)),by = list(texas0_arkansas1,term2year)]
 
 b. For each state, estimate the standard error of the estimated ATE. 
 
+**From 3.6, we calculate ** $\hat{SE} = \sqrt{\frac{\hat{Var(Y_i(0))}}{N-m}+\frac{\hat{Var(Y_i(1))}}{m}}$
 
-# If we use 3.4:
-
-**For each state, we calculate the standard error of the estimated ATE by using the following equation, number 3.4 in the FE:**
-
-$SE(\hat{ATE})=\sqrt{\frac{1}{N-1}\left\{ \frac{mVar(Y_i(0))}{N-m}+\frac{(N-m)Var(Y_i(1))}{m}+2Cov(Y_i(0),Y_i(1)) \right\} }$
-
-
-```{r}
-cov((dt[which(texas0_arkansas1==1 & term2year==0),,]$bills_introduced),(dt[which(texas0_arkansas1==1 & term2year==1),,]$bills_introduced))
-```
-
-
-```{r}
-AR_Y1 <- (dt[which(texas0_arkansas1==1 & term2year==1),,]$bills_introduced)
-AR_Y0 <- (dt[which(texas0_arkansas1==1 & term2year==0),,]$bills_introduced)
-TX_Y1 <- (dt[which(texas0_arkansas1==0 & term2year==1),,]$bills_introduced)
-TX_Y0 <- (dt[which(texas0_arkansas1==0 & term2year==0),,]$bills_introduced)
-
-#calculate variances:
-AR_var_Y1 <- var(AR_Y1)
-AR_var_Y0 <- var(AR_Y0)
-TX_var_Y1 <- var(TX_Y1)
-TX_var_Y0 <- var(TX_Y0)
-#calculate covariance:
-AR_cov <-0
-TX_cov <-0
-
-```
-
-# If we use 3.12:
-
-$SE(\hat{ATE}) = \sqrt{(SE_1)^2(\frac{N_1}{N})^2+(SE_2)^2(\frac{N_2}{N})^2}$
-
-**And we calculate ** $\hat{SE} = \sqrt{\frac{\hat{Var(Y_i(0))}}{N-m}+\frac{\hat{Var(Y_i(1))}}{m}}$
-
-**Where M is the number of observations from the treatment group**
+**Where m is the number of observations from the treatment group**
 
 ```{r}
 #Set up values:
@@ -266,9 +232,11 @@ print(c("Arkansas Standard Error", AR_SE, "Texas Standard Error", TX_SE))
 
 c. Use equation (3.10) to estimate the overall ATE for both states combined. 
 
-****
+**We use the equation 3.10,**
 
 $ATE = \sum_{j=1}^{J}\frac{N_j}{N}ATE_j$
+
+**Where J is the number of blocks, j is the blocks' index, and the weight $N_j/N$ is the share of subjects who belong to block j**
 
 ```{r}
 
@@ -286,7 +254,7 @@ tot_ATE
 
 d. Explain why, in this study, simply pooling the data for the two states and comparing the average number of bills introduced by two-year senators to the average number of bills introduced by four-year senators leads to biased estimate of the overall ATE. 
 
-**Intuitively, I would have suspected, ceteris parabus, that there would not be any affect on the overall ATE.  But thinking about it futher, perhaps pooling the data from the two states introduced by two-year senators compared to four-year senators leads to a biased estimate of the overall ATE chiefly because each state has different magnitudes of effects and combining them muddles the overall ATE as each state is clearly different (with Arkansas having a significantly lower base-line of bills introduced).  **
+**Intuitively, I would have suspected, ceteris paribus, that there would not be any affect on the overall ATE.  But thinking about it futher, perhaps pooling the data from the two states introduced by two-year senators compared to four-year senators leads to a biased estimate of the overall ATE chiefly because each state has different magnitudes of effects and combining them muddles the overall ATE as each state is clearly different (with Arkansas having a significantly lower base-line of bills introduced).  **
 
 e. Insert the estimated standard errors into equation (3.12) to estimate the stand error for the overall ATE. 
 
@@ -339,6 +307,10 @@ TX_results <- t(replicate(1000, run_study(0)))
 hist(TX_results)
 ```
 
+```{r}
+hist(AR_results)
+```
+
 
 **Now let's calculate the true ATE for Texas and True ATE for Arkansas:**
 
@@ -346,11 +318,14 @@ hist(TX_results)
 TX_true_ATE <- dt[which(texas0_arkansas1==0 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==0 & term2year==0),.(mean(bills_introduced)),]
 TX_true_ATE
 ```
+**Our true ATE for Texas is approximately -16.74.**
+
 
 ```{r}
 AR_true_ATE <- dt[which(texas0_arkansas1==1 & term2year==1),.(mean(bills_introduced)),] - dt[which(texas0_arkansas1==1 & term2year==0),.(mean(bills_introduced)),]
 AR_true_ATE
 ```
+**Our true ATE for Arkansas is approximately -10.1.**
 
 To test the Sharp null, we calculate the implied two-tailed p-value to see if we can reject or accept the null.
 
