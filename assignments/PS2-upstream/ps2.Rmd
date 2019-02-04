@@ -334,22 +334,18 @@ To test the Sharp null, we calculate the implied two-tailed p-value to see if we
 **Now we calculate the P-Value**
 
 ```{r}
-TX_true_ATE$[1] > TX_results
-
-```
-
-
-
-```{r}
-TX_p_val <-mean(TX_true_ATE < TX_results )
+TX_p_val <-mean(TX_true_ATE > TX_results )
 TX_p_val
 ```
 
+**With a p-value of 0.12, we cannot reject the Sharp null hypothesis for Texas, i.e. there is no average treatment effect.**
+
 ```{r}
-AR_p_val <-mean(AR_true_ATE < AR_results )
+AR_p_val <-mean(AR_true_ATE > AR_results )
 AR_p_val
 ```
 
+**However, with Arkansas, we get a p-value of .02 which is statistically significant, meaning that we can reject the Sharp null hypothesis of no average treatment effect leading us to conclude that there is an average treatment effect. **
 
 g. **IN Addition:** Plot histograms for both the treatment and control groups in each state (for 4 histograms in total).
 
