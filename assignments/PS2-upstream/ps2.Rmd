@@ -261,7 +261,7 @@ e. Insert the estimated standard errors into equation (3.12) to estimate the sta
 $SE(\hat{ATE}) = \sqrt{(SE_1)^2(\frac{N_1}{N})^2+(SE_2)^2(\frac{N_2}{N})^2}$
 
 ```{r}
-SE_ATE <- sqrt((AR_SE)^2*(AR_Y1_n+AR_Y0_n/tot_obs)^2+(AR_TX)^2*(TX_Y1_n+TX_Y0_n/tot_obs)^2)
+SE_ATE <- sqrt((AR_SE)^2*(AR_Y1_n+AR_Y0_n/tot_obs)^2+(TX_SE)^2*(TX_Y1_n+TX_Y0_n/tot_obs)^2)
 SE_ATE
 ```
 
@@ -394,6 +394,17 @@ mean(tot_ATE > comb_study )
 **Taken together, with a p-value of approximately 0.18, we cannot reject the Sharp null hypothesis for Texas, i.e. there is no average treatment effect.**
 
 g. **IN Addition:** Plot histograms for both the treatment and control groups in each state (for 4 histograms in total).
+
+
+```{r}
+AR_Y1_results <- t(replicate(1000, mean(dt[which(texas0_arkansas1==1 & term2year==1),,]$bills_introduced))) 
+AR_Y0_results <- t(replicate(1000, mean(dt[which(texas0_arkansas1==1 & term2year==0),,]$bills_introduced))) 
+
+TX_Y1_results <- t(replicate(1000, mean(dt[which(texas0_arkansas1==0 & term2year==1),,]$bills_introduced))) 
+TX_Y0_results <- t(replicate(1000, mean(dt[which(texas0_arkansas1==0 & term2year==0),,]$bills_introduced))) 
+```
+
+
 
 
 ```{r}
@@ -561,21 +572,17 @@ see if you can construct the equation: ad cost = lift in profit
 
 !-->
 
-
-
-
-**Currently Apple is spending nothing, but makes **
-
+**Currently Apple is spending nothing, but makes** $100*.005=0.5$ **per user.**
 
 **From the perspective of Apple**
-
-$users*conversionrate*unit_profit-(cpi * users)=0$
+$users*conversionrate*unit_profit-(cpm * users)=0$
 $1000000*conversionrate*100-(.1*1000000)=0$
 $1000000*conversionrate*100-(100000)=0$
 $1000000*conversionrate*100=100000$
 $1000000*conversionrate=1000$
 $conversionrate = .001$
 
+**Seen another way:**
 
 **Profit per user = Revenue per user - Costs per user**
 
@@ -586,7 +593,7 @@ $conversionrate = .001$
 ```{r}
 #Cost:
 cpi <- .1
-users <- 1000000
+users <- 1
 Ad_spend <- users *cpi
 Ad_spend
 ```
@@ -601,40 +608,59 @@ revenue <- users * conversion * unit_profit
 revenue
 ```
 
-**If shown to all users, at the current metrics, the revenue is 500K.  To calculate profit, we subtract cost (adspend) from revenue, that is, 500K-100K is 400K profit. **
-
-**To calculate the breakeven conversion rate, let' set up an algebra equation**
-
-$users*conversionrate*unit_profit-(cpi * users)=0$
-$1000000*conversionrate*100-(.1*1000000)=0$
-$1000000*conversionrate*100-(100000)=0$
-$1000000*conversionrate*100=100000$
-$1000000*conversionrate=1000$
-$conversionrate = .001$
-
-
-```{r}
-
-```
-
-
+**For things to be worth it, the ads need to provide a .1 lift in probability of a user buying an iPhone to the existing .5% for a total conversion rate of .6%.**
 
 b. Assume the measured effect is 0.2 percentage points. If users are split 50:50 between the treatment group (exposed to iPhone ads) and control group (exposed to unrelated advertising or nothing; something you can assume has no effect), what will be the confidence interval of your estimate on whether people purchase the phone?
 
-```{r}
+**If we use the entire audience population of 1 million:**
 
+**We then plug in the p into the SE equation:**
+
+$\sqrt{\frac{x_{1}+x_{2}}{n_{1}+n_{2}}(1-\frac{x_{1}+x_{2}}{n_{1}+n_{2}})*(\frac{1}{n_{1}}+\frac{1}{n_{2}})}$
+
+```{r}
+coeff <- .002
+
+users <- 1000000
+x_1 <- (.005) * users #successes = rate(base) * users
+x_2 <- (.002+.005) * users #successes = rate(base+new) * users
+n_1 <- users/2
+n_2 <- users/2
+
+SE <- sqrt(((x_1+x_2)/(n_1+n_2))*(1-((x_1+x_2)/(n_1+n_2)))*(((1)/(n_1))+((1)/(n_2))))
+
+lower_bound <- coeff - stand_error * 1.96
+upper_bound <- coeff + stand_error * 1.96
+print(c("Confidence Intervial", lower_bound, "to", upper_bound))
 ```
+
+```{r}
+SE
+```
+
 
   + **Note:** The standard error for a two-sample proportion test is $\sqrt{p(1-p)*(\frac{1}{n_{1}}+\frac{1}{n_{2}})}$ where $p=\frac{x_{1}+x_{2}}{n_{1}+n_{2}}$, where $x$ and $n$ refer to the number of "successes" (here, purchases) over the number of "trials" (here, site visits). The length of each tail of a 95% confidence interval is calculated by multiplying the standard error by 1.96.
   
 c. Is this confidence interval precise enough that you would recommend running this experiment? Why or why not?
 
+**I'm not 100% sure, but I think that the interval is not precise enough, because our confidence interval is only approximately -.27 to approximately .27 but our standard error is approximately 1.2.**
+
 d. Your boss at the newspaper, worried about potential loss of revenue, says he is not willing to hold back a control group any larger than 1% of users. What would be the width of the confidence interval for this experiment if only 1% of users were placed in the control group?
 
-
-
 ```{r}
+coeff <- .002
 
+users <- 1000000
+x_1 <- (.005) * users #successes = rate(base) * users
+x_2 <- (.002+.005) * users #successes = rate(base+new) * users
+n_1 <- users*.01
+n_2 <- 1-n_1
+
+SE <- sqrt(((x_1+x_2)/(n_1+n_2))*(1-((x_1+x_2)/(n_1+n_2)))*(((1)/(n_1))+((1)/(n_2))))
+
+lower_bound <- coeff - stand_error * 1.96
+upper_bound <- coeff + stand_error * 1.96
+print(c("Confidence Intervial Width", upper_bound-lower_bound))
 ```
 
 # 5. Sports Cards
@@ -689,8 +715,14 @@ linear_model
 d. Calculate the 95% confidence interval you get from the regression.
 
 ```{r}
-coeff <- linear_model$coefficients[2, 1]
-stand_error <- regression$coefficients[2, 2]
+linear_model$coefficients
+```
+
+**While Knitting, I get some funky error when calling them directly, so I'll manually input them so that knit works.**
+
+```{r}
+coeff <- .001116201#linear_model$coefficients[2]
+stand_error <- .1362625#regression$coefficients[4]
 lower_bound <- coeff - stand_error * 1.96
 upper_bound <- coeff + stand_error * 1.96
 print(c("Confidence Intervial", lower_bound, "to", upper_bound))
