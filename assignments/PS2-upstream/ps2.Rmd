@@ -39,7 +39,7 @@ dt <- data.table(d)
 ```
 a. Using either `dplyr` or `data.table`, group the data by `success` and report whether views toward others are generally more positive among lottery winners or lottery non-winners. 
 
-**We recall from the Datacamp Unit on data.table that the format for datatable is i, j, by, or in SQL-speak, WHERE, SELECT, GROUPBY.  Consequently, we want to groupby success and measure the average view.  That is, we want to get the mean of the views, grouped by success.  Or said formally, **
+**We recall from the Datacamp Unit on data.table that the format for datatable is i, j, by, or in SQL-speak, WHERE, SELECT, GROUPBY.  Consequently, we want to groupby success and measure the average view.  That is, we want to get the mean of the views, grouped by success.  Or said formally, take dt, calculate the mean of views, grouped by success.**
 
 ```{r}
 dt[,.(mean = mean(views)),by = success]
@@ -73,15 +73,16 @@ dt[,.(count = .N),]*.3
 **So our sample will consist of 288 records.**
 
 
-**Our Sharpe Null hypothesis is that there is a $\tau$ of no change, that is, $H_A-H_0=0$, where $H_A$ refers to the success of getting a visa, and $H_0$ refers to not being successful in getting a visa.  **
+**Our Sharpe Null hypothesis is that there is a $\tau$ of no change, that is, $H_A-H_0=0$, where $H_A$ refers to the success of getting a visa, and $H_0$ refers to not being successful in getting a visa.**
+
 
 **My proceedure will be the following:**
 **Create a function that: **
-**  Randomly draw 288 records**
-**  Stores in a vector the number of successes for each group**
-**  calculate each group's view mean.**
-**  calculate ate-hat by subtracting loss from success**
-**  store ate-hat into a vector**
+**1) Randomly draw 288 records**
+**2) Stores in a vector the number of successes for each group**
+**3) calculate each group's view mean.**
+**4) calculate ate-hat by subtracting loss from success**
+**5) store ate-hat into a vector**
 
 ```{r}
 #Create a function:
@@ -111,38 +112,42 @@ results <- t(replicate(10000, run_study()))
 c. How many of the simulated random assignments generate an estimated ATE that is at least as large as the actual estimate of the ATE? 
 
 ```{r}
-sum(results >= true_ate)
+result <- sum(results >= true_ate)
+result
 ```
 
-**520 of the simulated random assignments generated an estimated ATE that is at least as large as the actual estimate of the ATE.**
+`r result` **of the simulated random assignments generated an estimated ATE that is at least as large as the actual estimate of the ATE.**
 
 d. What is the implied *one-tailed* p-value? 
 
 **We recall that we can get the p-value under the randomization inference framework, by examining hte precent of values that occur at a place that is smaller or larger than the p-value we observe by taking the mean of the true ATE and the distribution under the sharpe null. **
 
 ```{r}
-mean(true_ate <results )
+p_val <- mean(true_ate <results )
+p_val
 ```
 
-**We see that this is boarderline signficant at .055.**
+**We see that this is boarderline signficant at ** `r p_val`
 
 e. How many of the simulated random assignments generate an estimated ATE that is at least as large *in absolute value* as the actual estimate of the ATE? 
 
 ```{r}
-sum(abs(results) >= true_ate)
+random_as <- sum(abs(results) >= true_ate)
+random_as
 ```
 
-**1099 random assignments are at least as large in aboslute value as the actual estimate of the ATE.**
+`r random_as` **random assignments are at least as large in aboslute value as the actual estimate of the ATE.**
 
 f. What is the implied two-tailed p-value? 
 
 **My understanding is that to take the two-tailed p-value, we double the value of the one-tailed p-value.**
 
 ```{r}
-mean(true_ate <results )*2
+two_tail <- mean(true_ate <results )*2
+two_tail
 ```
 
-**0.11 is not significant and means that we do not reject the Sharpe Null Hypothesis.**
+`r two_tail` **is not significant and means that we do not reject the Sharpe Null Hypothesis.**
 
 # 2. Term Limits Aren't Good. 
 
@@ -209,7 +214,7 @@ AR_Y0_n <- (dt[which(texas0_arkansas1==1 & term2year==0),.(count = .N),])
 TX_Y1_n <- (dt[which(texas0_arkansas1==0 & term2year==1),.(count = .N),])
 TX_Y0_n <- (dt[which(texas0_arkansas1==0 & term2year==0),.(count = .N),])
 
-
+#Calculate Totals
 tot_obs_AR <- AR_Y1_n+AR_Y0_n
 tot_obs_TX <- TX_Y1_n+TX_Y0_n
 tot_obs <-dt[, .(count = .N),]
@@ -273,12 +278,12 @@ f. Use randomization inference to test the sharp null hypothesis that the treatm
 
 **My proceedure will be the following:**
 **Create a function that: **
-**  Randomly draw 18 records**
-**  Stores in a vector the number of successes for each group**
-**  calculate each group's mean.**
-**  calculate ate-hat by subtracting control mean from treatment mean**
-**  store ate-hat into a vector**
-****
+**1)Randomly draw 18 records**
+**2)Stores in a vector the number of successes for each group**
+**3)calculate each group's mean.**
+**4)calculate ate-hat by subtracting control mean from treatment mean**
+**5)store ate-hat into a vector**
+
 ```{r}
 run_study <- function(state){
   # pull a sample & store it in a vector.  I'm choosing samples of 18.
@@ -338,7 +343,7 @@ TX_p_val <-mean(TX_true_ATE > TX_results )
 TX_p_val
 ```
 
-**With a p-value of 0.12, we cannot reject the Sharp null hypothesis for Texas, i.e. there is no average treatment effect.**
+**With a p-value of* 0.12,** `r TX_p_val` ** we cannot reject the Sharp null hypothesis for Texas, i.e. there is no average treatment effect.**
 
 ```{r}
 AR_p_val <-mean(AR_true_ATE > AR_results )
@@ -346,7 +351,7 @@ AR_p_val
 ```
 
 
-**However, with Arkansas, we get a p-value of .02 which is statistically significant, meaning that we can reject the Sharp null hypothesis of no average treatment effect leading us to conclude that there is an average treatment effect. **
+**However, with Arkansas, we get a p-value of** `r AR_p_val` **which is statistically significant, meaning that we can reject the Sharp null hypothesis of no average treatment effect leading us to conclude that there is an average treatment effect. **
 
 
 **What if we do it as a proportion?**
@@ -357,7 +362,7 @@ true_ate_prop
 
 ```
 
-**If done as a proportion, we get a p-value of approximately .08, which is marginally significant.**
+**If done as a proportion, we get a p-value of approximately** `r true_ate_prop` **, which is marginally significant.**
 
 **What if we run the sampling together?**
 
@@ -388,10 +393,10 @@ plot(density(comb_study))
 ```
 
 ```{r}
-mean(tot_ATE > comb_study )
+p_val <- mean(tot_ATE > comb_study )
 ```
 
-**Taken together, with a p-value of approximately 0.18, we cannot reject the Sharp null hypothesis for Texas, i.e. there is no average treatment effect.**
+**Taken together, with a p-value of approximately** `r p_val` **, we cannot reject the Sharp null hypothesis for Texas, i.e. there is no average treatment effect.**
 
 g. **IN Addition:** Plot histograms for both the treatment and control groups in each state (for 4 histograms in total).
 
@@ -698,7 +703,7 @@ t_test$conf.int
  
 b. In plain language, what does this confidence interval mean?
 
-**With 95% confidence, the difference in price of the treatment (uniform price auction) and control (non-uniform price auction) is between approximately -0.21 and approximately 11.42.**
+**With 95% confidence, the difference in mean price of the treatment (uniform price auction) and control (non-uniform price auction) is between approximately -0.21 and approximately 11.42.**
 
 c. Regression on a binary treatment variable turns out to give one the same answer as the standard analytic formula you just used.  Demonstrate this by regressing the bid on a binary variable equal to 0 for the control auction and 1 for the treatment auction.
 
@@ -745,10 +750,10 @@ dt[,.N,]*.3
 
 **My proceedure will be the following:**
 **Create a function that: **
-**  Randomly draw 21 records**
-**  calculate each group's view mean.**
-**  calculate ate-hat by subtracting the mean of the control from the mean of the treatment **
-**  store ate-hat into a vector**
+**1) Randomly draw 21 records**
+**2) calculate each group's view mean.**
+**3) calculate ate-hat by subtracting the mean of the control from the mean of the treatment **
+**4) store ate-hat into a vector**
 
 ```{r}
 dt[,.(mean = mean(bid)),by = uniform_price_auction]
