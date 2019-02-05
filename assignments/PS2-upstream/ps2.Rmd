@@ -620,7 +620,6 @@ $\sqrt{\frac{x_{1}+x_{2}}{n_{1}+n_{2}}(1-\frac{x_{1}+x_{2}}{n_{1}+n_{2}})*(\frac
 
 ```{r}
 coeff <- .002
-
 users <- 1000000
 x_1 <- (.005) * users #successes = rate(base) * users
 x_2 <- (.002+.005) * users #successes = rate(base+new) * users
@@ -629,8 +628,8 @@ n_2 <- users/2
 
 SE <- sqrt(((x_1+x_2)/(n_1+n_2))*(1-((x_1+x_2)/(n_1+n_2)))*(((1)/(n_1))+((1)/(n_2))))
 
-lower_bound <- coeff - stand_error * 1.96
-upper_bound <- coeff + stand_error * 1.96
+lower_bound <- coeff - SE * 1.96
+upper_bound <- coeff + SE * 1.96
 print(c("Confidence Intervial", lower_bound, "to", upper_bound))
 ```
 
@@ -658,8 +657,8 @@ n_2 <- 1-n_1
 
 SE <- sqrt(((x_1+x_2)/(n_1+n_2))*(1-((x_1+x_2)/(n_1+n_2)))*(((1)/(n_1))+((1)/(n_2))))
 
-lower_bound <- coeff - stand_error * 1.96
-upper_bound <- coeff + stand_error * 1.96
+lower_bound <- coeff - SE * 1.96
+upper_bound <- coeff + SE * 1.96
 print(c("Confidence Intervial Width", upper_bound-lower_bound))
 ```
 
@@ -699,7 +698,7 @@ t_test$conf.int
  
 b. In plain language, what does this confidence interval mean?
 
-
+**With 95% confidence, the difference in price of the treatment (uniform price auction) and control (non-uniform price auction) is between approximately -0.21 and approximately 11.42.**
 
 c. Regression on a binary treatment variable turns out to give one the same answer as the standard analytic formula you just used.  Demonstrate this by regressing the bid on a binary variable equal to 0 for the control auction and 1 for the treatment auction.
 
@@ -836,6 +835,9 @@ g. Compute the same p-value again using analytic formulas for a two-sample t-tes
 ```{r}
 t_test$p.value
 ```
+
 **The P-value we get from our t-test is approximately .0588, meaning that it is marginally signficant.**
 
 h. Compare the two p-values in parts (e) and (f). Are they much different? Why or why not? How might your answer to this question change if the sample size were different?
+
+**In problem e, my p-value is approximately 0.013 and in problem f, my p-value is approximately .15.  Unfortunately, yes, they are very much different.  This is potentially because our randomization inference bootstrapping is not nearly as accurate the regression, which increases the p-value.**
