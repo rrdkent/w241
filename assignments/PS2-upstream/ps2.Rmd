@@ -147,9 +147,30 @@ two_tail <- mean(true_ate <results )*2
 two_tail
 ```
 
+<<<<<<< HEAD
 `r two_tail` **is not significant and means that we do not reject the Sharpe Null Hypothesis.**
 
 # 2. Term Limits Aren't Good. 
+=======
+# 2. Randomization Inference Practice
+McElhoe and Conner (1986) suggest using a *new* instrument called a "Visiplume" measure pollution. The EPA has a standard method for measuring pollution. Because they're good scientists, McElhoe and Conner want to validate that their instrument is measuring the same levels of pollution as the EPA instrument. 
+
+To do so, they take six readings -- one with each instrument -- at a single site. The recorded response is the ratio of the Visiplume reading to the EPA standard reading, and the values that are recorded are: 0.950, 0.978, 0.762, 0.733, 0.823, and 1.011.
+
+Suppose that we want to test the question, "Do the Visiplume readings and the EPA standard readings produce similar enough estimates?"
+
+a. How would you structure the sharp-null hypothesis -- that Visiplume and the EPA reaings are the same -- in this case? 
+
+b. Suppose that our summary of the data is the sum of the ratios. That is, in the test that we conducted, we obsered $0.95 + ... + 1.011 = 5.257$. Using randomization inference, test the sharp-null hypothesis that you formed in the first part of the question. Produce a histogram of the test statistic under the sharp null that compares against the 5.257 value from the test, and also produce a two-sided p-value. 
+
+```{r}
+
+```
+
+
+
+# 3. Term Limits Aren't Good. 
+>>>>>>> 32cf49049db62e245f968fcead30e9fe1a90c457
 
 Naturally occurring experiments sometimes involve what is, in effect, block random assignment. For example, [Rocio Titiunik](https://sites.google.com/a/umich.edu/titiunik/publications) , in [this paper](http://www-personal.umich.edu/~titiunik/papers/Titiunik2016-PSRM.pdf) studies the effect of lotteries that determine whether state senators in TX and AR serve two-year or four-year terms in the aftermath of decennial redistricting. These lotteries are conducted within each state, and so there are effectively two distinct experiments on the effects of term length.
 
@@ -677,7 +698,9 @@ head(d2)
 
 In this experiment, the experimenters invited consumers at a sports card trading show to bid against one other bidder for a pair trading cards.  We abstract from the multi-unit-auction details here, and simply state that the treatment auction format was theoretically predicted to produce lower bids than the control auction format.  We provide you a relevant subset of data from the experiment.
 
-a. Compute a 95% confidence interval for the difference between the treatment mean and the control mean, using analytic formulas for a two-sample t-test from your earlier statistics course. 
+In this question, we are asking you to produce p-values and confidence intervals in three different ways: (1) Using a `t.test`, using a regression, and using randomization inference. 
+
+a. Using a `t.test`, compute a 95% confidence interval for the difference between the treatment mean and the control mean.
 
 **For this problem, our treatment is a uniform price auction (1) and the control is a non-uniform price auction (0)**
 
@@ -692,10 +715,26 @@ treatment <- dt[uniform_price_auction == 1,,]
 control <- dt[uniform_price_auction == 0,,]
 ```
 
+
 ```{r}
-t_test <- t.test( control, treatment, conf=0.95)
+dt$uniform_price_auction
+```
+
+
+```{r}
+mean(treatment$bid)
+```
+```{r}
+mean(control$bid)
+```
+
+
+
+```{r}
+t_test <- t.test( treatment$bid, control$bid, conf=0.95)
 t_test
 ```
+
 ```{r}
 t_test$conf.int
 ```
@@ -708,7 +747,7 @@ b. In plain language, what does this confidence interval mean?
 c. Regression on a binary treatment variable turns out to give one the same answer as the standard analytic formula you just used.  Demonstrate this by regressing the bid on a binary variable equal to 0 for the control auction and 1 for the treatment auction.
 
 ```{r}
-fit <- lm(treatment$bid ~ control$bid, data=dt )
+fit <- lm(dt$bid ~ dt$uniform_price_auction, data=dt )
 ```
 
 ```{r}
@@ -716,7 +755,7 @@ linear_model <- summary(fit)
 linear_model
 ```
 
-d. Calculate the 95% confidence interval you get from the regression.
+d. Calculate the 95% confidence interval you get from the regression. There is a built in, 
 
 ```{r}
 linear_model$coefficients
@@ -725,8 +764,8 @@ linear_model$coefficients
 **While Knitting, I get some funky error when calling them directly, so I'll manually input them so that knit works.**
 
 ```{r}
-coeff <- .001116201#linear_model$coefficients[2]
-stand_error <- .1362625#regression$coefficients[4]
+coeff <- linear_model$coefficients[2]
+stand_error <- linear_model$coefficients[4]
 lower_bound <- coeff - stand_error * 1.96
 upper_bound <- coeff + stand_error * 1.96
 print(c("Confidence Intervial", lower_bound, "to", upper_bound))
@@ -735,7 +774,7 @@ print(c("Confidence Intervial", lower_bound, "to", upper_bound))
 e. On to p-values. What p-value does the regression report? Note: please use two-tailed tests for the entire problem.
 
 ```{r}
-(1-linear_model$coefficients[2,4])*2
+(linear_model$coefficients[2,4])*2
 ```
 
 f. Now compute the same p-value using randomization inference.
@@ -759,6 +798,10 @@ dt[,.N,]*.3
 dt[,.(mean = mean(bid)),by = uniform_price_auction]
 ```
 
+<<<<<<< HEAD
+=======
+g. Pull the same p-value from the `t.test`. 
+>>>>>>> 32cf49049db62e245f968fcead30e9fe1a90c457
 
 ```{r}
 #Create a function:

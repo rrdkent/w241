@@ -64,6 +64,7 @@ sample_1 <- mean(population[1:10])
 sample_2 <- mean(population[1:100])
 sample_3 <- mean(population[1:999])
 
+<<<<<<< HEAD
 #kable::kable()
 ```
 
@@ -72,6 +73,9 @@ sample_1
 ```
 ```{r}
 sample_2
+=======
+knitr::kable()
+>>>>>>> 32cf49049db62e245f968fcead30e9fe1a90c457
 ```
 ```{r}
 sample_3
