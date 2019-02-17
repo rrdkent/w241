@@ -1,9 +1,11 @@
 ---
 title: "Problem Set 3"
-author: "Experiments and Causality"
+author: "Daniel Kent, Spring 2019"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
+  html_document:
+  df_print: paged
   pdf_document: default
-  html_document: default
 ---
 
 <!--
@@ -41,9 +43,60 @@ Skim [Broockman and Green's](http://link.springer.com/article/10.1007/s11109-013
 d <- read.csv("./data/broockman_green_anon_pooled_fb_users_only.csv")
 ``` 
 
+**First, let's look at what we have in our data**
+
+```{r}
+d
+```
+**Awesome, lots of data to work with, but phew, let's try to get some parameters to understand what we're working with.**
+
+```{r}
+#Load it up in Data Table!
+dt <- data.table(d)
+```
+
+
+
+```{r}
+dt[,.(count= .N), studyno]
+
+```
+**We observe that we're dealing with approximately 1350 observations in each study.  But let's slice it a bit more to see more detail:**
+
+```{r}
+dt[,.(count= .N), by=list(studyno, treat_ad)]
+```
+
+**OK, for Study 1, there's a 5:8 split, but with study two, there's a 10:3 split in terms of control to treatment.  Interesting and good to keep in mind.**
+
+
 a. Using regression without clustered standard errors (that is, ignoring the clustered assignment), compute a confidence interval for the effect of the ad on candidate name recognition in Study 1 only (the dependent variable is "name_recall"). 
 + **Note**: Ignore the blocking the article mentions throughout this problem.
 + **Note**: You will estimate something different than is reported in the study. 
+
+**OK, so we filter for study 1, and then run a linear regression, regressing the dependent variable (name_recall) on the indepedent variable (treat_ad).**
+
+```{r}
+dependent <- dt[c(studyno==1),,]$name_recall
+independent <- dt[c(studyno==1),,]$treat_ad
+```
+
+
+```{r}
+fit <- lm(dependent ~ independent, data=dt )
+```
+
+```{r}
+linear_model <- summary(fit)
+linear_model
+```
+
+**And using the awesome trick we learned from PS2, we can use confint to get the confidence interval:**
+```{r}
+confint(fit, level=.95)
+```
+**So we see that the confidence interval we get from the regression is (-.05 to .03).  This means that there is a 95% probability that the true ATE falls within this range.**  
+
 
 b. What are the clusters in Broockman and Green's study? Why might taking clustering into account increase the standard errors?
 
