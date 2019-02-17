@@ -100,12 +100,29 @@ confint(fit, level=.95)
 
 b. What are the clusters in Broockman and Green's study? Why might taking clustering into account increase the standard errors?
 
+**On page 266, the authors supply a few example clusters: "24 year old males in SF, 24 year old males in Palo Alto, 25 year old females in SF).  So consquently, it appears that they clustered on Age by Gender by Residence Location.  Thi is what they say on page 267: "We then generated clusters of individuals with unique combinations of age, gender, and location)."  I believe that clustering by some variables can reduce standard error by adjusting for one of the sources of deviation in our results, but may be overcome by the effect with something like when reducing the sample size for one of the cluster split conditions.  For example, if there was a discernable treatment affect among men versus women, but when clustered on men versus women, there are more men in a location than women in a location and when we adjust for one source of devation in the results by gender, we increased it by reducing the effective sample size, hypothetically speaking. **
+
 c. Now repeat part (a), but taking clustering into account. That is, compute a confidence interval for the effect of the ad on candidate name recognition in Study 1, but now correctly accounting for the clustered nature of the treatment assignment. If you're not familiar with how to calculate these clustered and robust estimates, there is a demo worksheet that is available in our course repository: `./code/week5clusterAndRobust.Rmd`.
+```{r}
+#Better load up some more packages!
+library(sandwich)
+library(multiwayvcov)
+```
+
+```{r}
+head(dt$cluster)
+```
+
+
+```{r}
+linear_model$cluster1.vcov <- cluster.vcov(linear_model, dt[c(studyno==1),,]$cluster)
+```
+
 
 d. Repeat part (c), but now for Study 2 only.
 
 ```{r} 
-
+linear_model$cluster1
 ```
 
 e. Repeat part (c), but using the entire sample from both studies. Do not take into account which study the data is from (more on this in a moment), but just pool the data and run one omnibus regression. What is the treatment effect estimate and associated p-value?
