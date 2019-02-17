@@ -188,11 +188,25 @@ h. If we were to remove the "has cell phone" variable from the regression, what 
 Staying with the same experiment, now lets think about multifactor experiments. 
 
 a. What is the full experimental design for this experiment?  Tell us the dimensions, such as 2x2x3.  (Hint: the full results appear in Panel 4B.)
+**Bin without sticker, bin with a sticker, (didn't recieve a bin); got an generic SMS message, got a personal SMS message, (didn't get an SMS message) and *grumble* Has a Cell phone, (Doesn't have a cell phone). Consequently the dimensions are 3x3x2, one dimension regarding the bin/sticker, one regarding the SMS message, and one for the cell phone.**
+
 b. In the results of Table 4B, describe the baseline category. That is, in English, how would you describe the attributes of the group of people for whom all dummy variables are equal to zero?
+
+**Recognizing that we have 3x3x2 dimensions, and in Table 4B, there are only five of treatment coefficents labled, we look for what is missing.  With respect to the bin dimension, we see bin with a sticker, and bin without a sticker, so then the remaining option which would be associated with a "zero" dummy variable is "no bin" provided.  With respect to the other dimension, SMS messages, we see the personal SMS message, and generic SMS message, so the remaining option also associated with the "Zero" dummy variable is "no SMS" sent.  Finally, the last variable is "has cell phone" so the other dimension is "Doesn't have a cell phone."  So our baseline is more or less like a control - no bin, no sms, no cell phone (I.e. no treatment/interference). **
+
 c. In column (1) of Table 4B, interpret the magnitude of the coefficient on "bin without sticker."  What does it mean?
+
+**In column (1) of Table 4B, which is the percentage of visits turned in bag, the "bin without sticker" is associated with a coefficent of 0.035, a SE of 0.015, and two asterisks.  This means that relative to the baseline (no bin, no SMS), providing the user with just a bin without a sticker resulted in a statistically signficant average estimated treatment effect of .035 at the 5% level.  Said another way, providing a bin without a sticker made 3.5% more households turn in a bag.**
+
 d. In column (1) of Table 4B, which seems to have a stronger treatment effect, the recycling bin with message sticker, or the recycling bin without sticker?  How large is the magnitude of the estimated difference?
+
+**Observing the coefficents associated with the different treatmetns of "bin with sticker" and "bin without sticker" with respect to the percengae of visits where households turned in a bag, we observe that bin with sticker has a statistically signficant effect at the 1% level of .055 with a SE of .015, whereas the bin without a sticker has as statistically significant effect of .035 with an SE also of .015 at the 5% level.**
+
 e. Is this difference you just described statistically significant?  Explain which piece of information in the table allows you to answer this question.
+
 f. Notice that Table 4C is described as results from "fully saturated" models.  What does this mean?  Looking at the list of variables in the table, explain in what sense the model is "saturated."
+
+**I believe a fully saturated model is a model that includes nearly every single possible coefficent, in a model, except for one. For example, we have No SMS message, for the bin with sticker, bin, and no bin, (all of the bin options); pesronalized SMS for the bin, bin with sticker and no bin (all of the bin options); and generic SMS message for bin and no bin.  Uh oh, so we're missing Generic SMS message with bin and sticker, so that would be the "base case".  Consequently with that in mind, everything else is included so we can see the load on each coefficent and hence we call the model saturated.**
 
 # 4 Now! Do it with data 
 Download the data set for the recycling study in the previous problem, obtained from the authors. We'll be focusing on the outcome variable Y="number of bins turned in per week" (avg_bins_treat).
