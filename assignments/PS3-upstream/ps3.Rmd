@@ -150,19 +150,39 @@ Look at [this article](https://drive.google.com/file/d/0BxwM1dZBYvxBVzQtQW9nbmd2
 
 a. In Column 3 of Table 4A, what is the estimated ATE of providing a recycling bin on the average weight of recyclables turned in per household per week, during the six-week treatment period?  Provide a 95% confidence interval.
 
+**We observe that by providing any bin, there is a statistically signfiicant increase in estimated ATE of average weight of recyclables turned in per week of .187 kg during the six week period.  To calculate the 95% confidence interval for the estimated ATE, we take the estimated ATE coefficent +/- two standard errors. That is:**
+
+$0.187 \pm 1.96*(0.032) = $ **-0.12428 to 0.24972**
+
 b. In Column 3 of Table 4A, what is the estimated ATE of sending a text message reminder on the average weight of recyclables turned in per household per week?  Provide a 95% confidence interval.
+
+**We observe that any SMS message results in a non-statistically signficant decrease in estimated ATE of average weight of recyclables turned in per week of .024 (i.e. a -.024 gain) kg during the six week period. To calculate the 95% confidence interval for the estimated ATE, we take the estimated ATE coefficent +/- two standard errors. That is:**
+
+$-0.024 \pm 1.96*(0.039) = $ **-.10044 to .05244**
 
 c. Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of providing a recycling bin?
 
+**According to the Notes, any coefficent with at least two asterisks represents signficance at the 5% confidence level.  Consequently for the providing of a recycling bin (i.e. any bin), the percent of visits turned in bag, average number of bins turned in per week, average weight of recyclables turned in per week, and average market value of recyclables given per week all showed statistically signficant effects at the 5% level of providing a recycling bin. (Columns 1,2,3 and 4)**
+
 d. Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of sending text messages?
+
+**Based on the same notes described above in part c, no outcome measured show statistically signficant effects at the 5% level when sending text messages.**
 
 e. Suppose that, during the two weeks before treatment, household A turns in 2kg per week more recyclables than household B does, and suppose that both households are otherwise identical (including being in the same treatment group).  From the model, how much more recycling do we predict household A to have than household B, per week, during the six weeks of treatment?   Provide only a point estimate, as the confidence interval would be a bit complicated.  This question is designed to test your understanding of slope coefficients in regression.
 
+
+
 f. Suppose that the variable "percentage of visits turned in bag, baseline" had been left out of the regression reported in Column 1.  What would you expect to happen to the results on providing a recycling bin?  Would you expect an increase or decrease in the estimated ATE?  Would you expect an increase or decrease in the standard error?  Explain your reasoning.
+
+**In column one, the variable "percentage of visits turne din bag, baseline was the highest magnitude coefficent.  I believe this means that if we turn the SMS variable (i.e. no SMS), the has cellphone (i.e. doesn't have a cellphone), and any bin(i.e. no bin) off, our baseline would be that .374 percent of visits to households resulted in the turning in of a bag.  Because this is a higher magnitude than the other variables, I believe we can deduce that this is the key driver in the estimated ATE.  If it was left out, I would suspect that some of the magnitude would be distributed proportionally to the other included variables though the overall estimated ATE would go down because we don't have as precise a model to estimate ATE.  I would also expect the Standard Error to increase because our pecision with which the regression coeffcient is esimated would be reduced.  That is, our less precise esimate of the coefficent would result in a higher SE because a major input of the response variable yielding a more precise model is removed. **
 
 g. In column 1 of Table 4A, would you say the variable "has cell phone" is a bad control?  Explain your reasoning.
 
+**I would say it is a non-optimal control because as the authors mentioned on page 18 themselves, that the cellphone control is correlated with SMS message assignment.  Basically, to my knowlege, since there is no other straightforward way to recieve an SMS without a cellphone, there would be a 1:1  relationship of individuals who recieve any SMS message and have a cell phone.  Consequently this might lead to interference among the coefficents because of the lack of independence of each control.**
+
 h. If we were to remove the "has cell phone" variable from the regression, what would you expect to happen to the coefficient on "Any SMS message"?  Would it go up or down? Explain your reasoning.
+
+**I would expect that the overall precision of the model to go down, but the coefficent on "Any SMS message" would increase, as some of the cell phone coefficent would load onto the "Any SMS Message" coefficent.  This might be because cell phones provide some explanation with respect to the participant population, but because they are highly correlated with the "any SMS message," they we would eliminate some of the interference we discussed in part g.  For instance, the cell phone might indicate other things than ability to accept SMS messages, like class (maybe more middle class residents have cell phones than lower class individuals) and this would otherwise not be included to the same degree in the regression if we eliminated the cell phone variable.  It would instead partially load onto the SMS variable, as sort of more of a catch-all for the nuance breakout we get from the cellphone variable. **
 
 # 3 Multifactor Experiments 
 Staying with the same experiment, now lets think about multifactor experiments. 
