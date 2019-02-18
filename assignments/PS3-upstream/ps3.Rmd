@@ -218,51 +218,136 @@ head(d)
 ## Do some quick exploratory data analysis with this data. There are some values in this data that seem a bit strange. Determine what these are, and figure out what you would like to do with them. Also, notice what happens with your estimates vis-a-vis the estimates that are produced by the authors when you do something sensible with this strange values. 
 ```
 
+```{r}
+dt <- data.table(d)
+```
+
+```{r}
+dt[,.N,]
+```
+**OK, we're dealing with 1785 individual observations.**
+
+```{r}
+summary(dt)
+```
+
+**We see from our data that there are three NA values in the street feature, and 1 NA value in the havecell feature.  I'm recommending to drop these because I am assuming that if there is an error in the data collection for these values, the rest of the data is suspect.**
+```{r}
+hist(dt$street)
+```
+**Additionally, we see some values in Street with -999.  I am going to drop these as well for similar reasons as to the NA.**
+
+**Everything else, generally, looks ok.**
+
+```{r}
+dt <- dt[dt$street>=0 & havecell>=0,,]
+```
+```{r}
+summary(dt)
+```
+```{r}
+dt[,.N,]
+```
 
 
 a. For simplicity, let's start by measuring the effect of providing a recycling bin, ignoring the SMS message treatment (and ignoring whether there was a sticker on the bin or not).  Run a regression of Y on only the bin treatment dummy, so you estimate a simple difference in means.  Provide a 95% confidence interval for the treatment effect.
 
 ```{r}
-
+fit <- lm(dt$avg_bins_treat ~ dt$bin , data=dt)
+summary(fit)
 ```
+
+**We recall that a 95% confidence interval is the coefficent +/- 1.96 * SE So:**
+
+$.1347 \pm 1.96 * .02086$
+
+**The 95% confidence interval is between 0.0938144 and 0.1755856. Which means, there is a 95% probability that the true ATE falls between 0.0938144 and 0.1755856... or that this confdience interval will overlap with the population level treatment effect in 95 out of 100 times that the procedure is replicated, under the same sampling conditions.**
 
 b. Now add the pre-treatment value of Y as a covariate.  Provide a 95% confidence interval for the treatment effect.  Explain how and why this confidence interval differs from the previous one.
 
 ```{r}
-
+fit <- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat, data=dt)
+summary(fit)
 ```
+
+
+**We recall that a 95% confidence interval is the coefficent +/- 1.96 * SE So:**
+
+$.12711 \pm 1.96 * .01722$
+
+**The 95% confidence interval is between .0933588 and .160861. Which means, there is a 95% probability that the true ATE falls between .0933588 and .160861... or that this confdience interval will overlap with the population level treatment effect in 95 out of 100 times that the procedure is replicated, under the same sampling conditions.**
+
+**Compared with the previous estimate, we see that our interval has decreased from .0817712 to .0675024, in addition to shifting down a bit.  This confidence interval differs in that it is smaller because we are controlling for another variable (the base value, pre-treatment of Y), so that more the explanatory magnitude falls appropriately on the variables that break out the different effects more, leading to a reduction in standard error associated with the coefficent(thereby reducing the interval) since we are dealing with a more precise model.**
 
 c. Now add the street fixed effects.  (You'll need to use the R command factor().) Provide a 95% confidence interval for the treatment effect.  
 
 ```{r}
-
+fit <- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + factor(street), data=dt)
+summary(fit)
 ```
 
 d. Recall that the authors described their experiment as "stratified at the street level," which is a synonym for blocking by street.  Explain why the confidence interval with fixed effects does not differ much from the previous one.
 
+**Our previous model, which included measuring the effect of providing a recycling bin and the pre-treatment value of Y as a covariate, resulted in a statistically significant coefficent of .12711 and an SE of .01722.  Our model stratified at the street level resulted in a statistically signficant coefficent for the treatment of .1160641 and an SE of .0176099.  The previous model's 95% confidence interval was between .0933588 and .160861 with a distance of .0675024 and this model, with street effects, is:**
+
+$.1160641 \pm 1.96 * .0176099$
+ **Between .0815487 amd .15058 with a distance of .0690308.  I believe that the confidence interval doesn't differ much from the previous model because not much information is being added when we add the blocking by street protocol.  In effect, our model is not getting more precies thereby reducing our standard errors yielding a smaller confidence interval.**
+
 e. Perhaps having a cell phone helps explain the level of recycling behavior. Instead of "has cell phone," we find it easier to interpret the coefficient if we define the variable " no cell phone."  Give the R command to define this new variable, which equals one minus the "has cell phone" variable in the authors' data set.  Use "no cell phone" instead of "has cell phone" in subsequent regressions with this dataset.
 
 ```{r}
-
+output <- 1-dt$havecell
+head(output)
 ```
+```{r}
+head(dt$havecell)
+```
+```{r}
+dt$nocell <- output
+dt
+```
+
+```{r}
+head(dt$nocell)
+```
+
 
 f. Now add "no cell phone" as a covariate to the previous regression.  Provide a 95% confidence interval for the treatment effect.  Explain why this confidence interval does not differ much from the previous one.
 
 ```{r}
-
+fit <- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + dt$nocell + factor(street), data=dt)
+summary(fit)
 ```
+
+**Our previous, model stratified at the street level resulted in a statistically signficant coefficent for the treatment of .1160641 and an SE of .0176099.  This yields a 95% confidence interval of between .0815487 amd .15058 with a distance of .0690308**
+
+**Our current model with the nocell covariate yields a statistically signficant treatment coefficent of .1171694 and an SE of .0175861**
+
+$.1171694 \pm 1.96 * .0175861$
+
+**Yielding a 95% confidence interval of between .0827006 and .151638 with a distance of .0689375, which is a hare smaller of an interval than from the previous model.**
+
+**Again, I believe that the confidence interval doesn't differ much from the previous model because not much information is being added when we adding the no-cell covariate.  In effect, our model is not getting more precise because much of the explanatory power of the coefficents is not broken out by the nocell covariate.**
 
 g. Now let's add in the SMS treatment.  Re-run the previous regression with "any SMS" included.  You should get the same results as in Table 4A.  Provide a 95% confidence interval for the treatment effect of the recycling bin.  Explain why this confidence interval does not differ much from the previous one.
 
 ```{r}
-
+fit <- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + dt$nocell + dt$sms + factor(street), data=dt)
+summary(fit)
 ```
 
 h. Now reproduce the results of column 2 in Table 4B, estimating separate treatment effects for the two types of SMS treatments and the two types of recycling-bin treatments.  Provide a 95% confidence interval for the effect of the unadorned recycling bin.  Explain how your answer differs from that in part (g), and explain why you think it differs.
 
 ```{r}
-
+fit <- lm(dt$avg_bins_treat ~ dt$sms_g + dt$sms_p + dt$bin_g + dt$bin_s, data=dt)
+summary(fit)
 ```
+
+**We obtain a 95% confidence level by taking the sum of the coefficent being examined plus/minus 1.96 times the Standard Error.  Because the unadorned recycling bin's Coefficent is .130793 and its SE is .026975:**
+
+$.130793 \pm 1.96 * .026975$
+
+**Our 95% confidence interval is between 0.077922 and 0.183664, a distance of .105742**
 
 # 5 A Final Practice Problem 
 Now for a fictional scenario. An emergency two-week randomized controlled trial of the experimental drug ZMapp is conducted to treat Ebola. (The control represents the usual standard of care for patients identified with Ebola, while the treatment is the usual standard of care plus the drug.) 
@@ -274,12 +359,19 @@ d <- read.csv("./data/ebola_rct2.csv")
 head(d)
 ```
 
+```{r}
+dt <- data.table(d)
+dt[,.N,]
+```
+ **OK, we have 100 observations**
+
 You are asked to analyze it. Patients' temperature and whether they are vomiting is recorded on day 0 of the experiment, then ZMapp is administered to patients in the treatment group on day 1. Vomiting and temperature is again recorded on day 14.
 
 a. Without using any covariates, answer this question with regression: What is the estimated effect of ZMapp (with standard error in parentheses) on whether someone was vomiting on day 14? What is the p-value associated with this estimate?
 
 ```{r}
-
+fit <- lm(dt$vomiting_day14 ~ dt$treat_zmapp , data=dt)
+summary(fit)
 ```
 
 b. Add covariates for vomiting on day 0 and patient temperature on day 0 to the regression from part (a) and report the ATE (with standard error). Also report the p-value.
