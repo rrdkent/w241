@@ -14,6 +14,7 @@ I know that this is a little bit in the middle of a number of tasks:
 - You're taking quizzes, *and* 
 - Now I'm asking you to code. 
 
+
 If this is too much to do all at once, then feel free to come back to this later. 
 
 # The task 
@@ -62,6 +63,11 @@ d[grepl(pattern = 'Diploma Education', t_training), t_training_n := 2]
 d[t_training == 'Bachelors Education', t_training_n := 3]
 d[t_training == 'Masters Education', t_training_n := 4]
 ```
+
+```{r}
+d
+```
+
 
 Eww. Say a prayer of absolution for that crime against data. 
 

@@ -83,17 +83,17 @@ independent <- dt[c(studyno==1),,]$treat_ad
 
 
 ```{r}
-fit <- lm(dependent ~ independent, data=dt )
+lm <- lm(dependent ~ independent, data=dt )
 ```
 
 ```{r}
-linear_model <- summary(fit)
-linear_model
+lm_stat <- summary(lm)
+lm_stat
 ```
 
 **And using the awesome trick we learned from PS2, we can use confint to get the confidence interval:**
 ```{r}
-confint(fit, level=.95)
+confint(lm, level=.95)
 ```
 **So we see that the confidence interval we get from the regression is (-.05 to .03).  This means that there is a 95% probability that the true ATE falls within this range.**  
 
@@ -115,26 +115,58 @@ head(dt$cluster)
 
 
 ```{r}
-linear_model$cluster1.vcov <- cluster.vcov(linear_model, dt[c(studyno==1),,]$cluster)
+lm$cluster1.vcov <- cluster.vcov(model = lm, cluster = dt[c(studyno==1),,]$cluster)
+coeftest(lm, lm$cluster1.vcov)
 ```
+**Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent of approximately -.01 and a SE of .023. Thus our 95% confidence interval is calculated:**
 
+$-.01 \pm 1.96 * .0237536$
+
+**And our 95% confidence interval is between -.9565571 and .0365571 with a distance of .0931141.**
 
 d. Repeat part (c), but now for Study 2 only.
 
 ```{r} 
-linear_model$cluster1
+dependent <- dt[c(studyno==2),,]$name_recall
+independent <- dt[c(studyno==2),,]$treat_ad
+lm <- lm(dependent ~ independent, data=dt )
+
+lm$cluster2.vcov <- cluster.vcov(model = lm, cluster = dt[c(studyno==2),,]$cluster)
+coeftest(lm, lm$cluster2.vcov)
 ```
+**Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent of approximately -.003 and a SE of .036. Thus our 95% confidence interval is calculated:**
+
+$-.003 \pm 1.96 * .036$
+
+**And our 95% confidence interval is between -.07356 and .06756 with a distance of .14112**
 
 e. Repeat part (c), but using the entire sample from both studies. Do not take into account which study the data is from (more on this in a moment), but just pool the data and run one omnibus regression. What is the treatment effect estimate and associated p-value?
 
 ```{r}
+dependent <- dt$name_recall
+independent <- dt$treat_ad
+lm <- lm(dependent ~ independent, data=dt )
 
+lm$cluster3.vcov <- cluster.vcov(model = lm, cluster = dt$cluster)
+coeftest(lm, lm$cluster3.vcov)
 ```
+**Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent (treatment effect) of approximately -.16 and a SE of .027. Thus our 95% confidence interval is calculated:**
+
+$-.16 \pm 1.96 * .027$
+
+**And our 95% confidence interval is between -.21292 and -.10708 with a distance of .10584**
+
+**The p-value associated with the treatment effect is a miniscule .000000007344**
 
 f. Now, repeat part (e) but include a dummy variable (a 0/1 binary variable) for whether the data are from Study 1 or Study 2. What is the treatment effect estimate and associated p-value?
 
 ```{r}
+dependent <- dt$name_recall
+independent <- dt$treat_ad
+lm <- lm(dependent ~ independent + 1-dt$studyno, data=dt )
 
+lm$cluster4.vcov <- cluster.vcov(model = lm, cluster = dt$cluster)
+coeftest(lm, lm$cluster4.vcov)
 ```
 
 g. Why did the results from parts (e) and (f) differ? Which result is biased, and why? (Hint: see pages 75-76 of Gerber and Green, with more detailed discussion optionally available on pages 116-121.)
@@ -374,38 +406,56 @@ fit <- lm(dt$vomiting_day14 ~ dt$treat_zmapp , data=dt)
 summary(fit)
 ```
 
+**The estimated treatment effect of ZMapp on whether someone was vomiting on day 14 was -0.23770 (SE is .08563).  The P-value associated with this esimate is .0066, which is significant at the 1% level. **
+
 b. Add covariates for vomiting on day 0 and patient temperature on day 0 to the regression from part (a) and report the ATE (with standard error). Also report the p-value.
 
 ```{r}
-
+fit <- lm(dt$vomiting_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + dt$temperature_day0, data=dt)
+summary(fit)
 ```
 
+**The estimated treatment effect of ZMapp on whether someone was vomiting on day 14 with this expanded model was -0.16554 (SE is .07567).  The P-value associated with this esimate is .03113, which is significant at the 5% level. **
+
 c. Do you prefer the estimate of the ATE reported in part (a) or part (b)? Why?
+
+**I prefer the estimate of the ATE reported in part b versus part a, because we are adding covariates that logically make sense that they would have an impact on the response variable - that is, the vomiting of a subject on day 14 would be impacted by other features than just if she took ZMapp.  For instance, if she was vomitting in Day 0, i.e. indicating illness, it could have a direct effect (without treatment) that she would still be sick and vomitting on day 14.  Further, another indicator of illness would be temperature pointing to a fever, which would also play into whether one is vomiting on day 14.  Further, our adjusted R-squared seems to have increased as well indicating a better fit model. **
 
 d. The regression from part (b) suggests that temperature is highly predictive of vomiting. Also include temperature on day 14 as a covariate in the regression from part (b) and report the ATE, the standard error, and the p-value.
 
 ```{r}
-
+fit <- lm(dt$vomiting_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + dt$temperature_day0 + dt$temperature_day14, data=dt)
+summary(fit)
 ```
 
+**The estimated treatment effect of ZMapp on whether someone was vomiting on day 14 with this expanded model was -0.12010 (SE is 0.07768).  The P-value associated with this esimate is .12541, which is not signficant. **
+
 e. Do you prefer the estimate of the ATE reported in part (b) or part (d)? Why?
+
+**Were I a greedy fishing scientist, I would prefer the estimate of the ATE reported in part b, becauase the results indicated a statistically signficant treatment effect; however, as a dispassionate and emperically-minded scientist, I prefer the estimate of the ATE in part d, because it presents a more complete model (The Adjusted R-squared increased a bit), and as we discussed above, temperature on day 14 makes logical sense that it might be an indicator of illness yielding vomitting on day 14.  Consqeuently, even though we lose our statistically significant coefficent, I believe it presents a more robust model and picture of what is going on. **
 
 f. Now let's switch from the outcome of vomiting to the outcome of temperature, and use the same regression covariates as in part (b). Test the hypothesis that ZMapp is especially likely to reduce men's temperatures, as compared to women's, and describe how you did so. What do the results suggest?
 
 ```{r}
-
+fit <- lm(dt$temperature_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + dt$temperature_day0 +factor(dt$male), data=dt)
+summary(fit)
 ```
 
 g. Suppose that you had not run the regression in part (f). Instead, you speak with a colleague to learn about heterogenous treatment effects. This colleague has access to a non-anonymized version of the same dataset and reports that he had looked at heterogenous effects of the ZMapp treatment by each of 10,000 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 2,000 different indicators of health, for 20,000,000 different regressions in total. Across these 20,000,000 regressions your colleague ran, the treatment's interaction with gender on the outcome of temperature is the only heterogenous treatment effect that he found to be statistically significant. He reasons that this shows the importance of gender for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering his confidence, after looking at the data, he also returned to his medical textbooks and built a theory about why ZMapp interacts with processes only present in men to cure. Another doctor, unfamiliar with the data, hears his theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)
 
-```{r}
+**A large issue of mine is that we don't know how the sample was selected - whether it was a randomized trial or whether it was given to select individuals, such as US military personnel.  Just like the HIE from the Mastering 'Metrics book which had treatment groups associated with each plan were mostly too small for comparisons between them to be statistically meaningful, an additional concern of mine is that we are dealing with a sample of 100 individuals, which, in the scheme of things, is not that large.  Gerber and Green mention that when we compare treatment affects across different subgroups and settings, we have to ensure that our interpretation is done in a rigerous manner so it is not impacated by things like sampling variability, which is my concern.  I also take issue with his logic-by-deduction - that because the only heterogenous treatment effect that was statistically signficant was gender, then it *must* be gender.**
 
+```{r}
+dt[,.N,by=list(male, treat_zmapp)]
 ```
+**Even when our sample size is 100, I am even more worried about the sample of this study and in particular, the distribution of subjects - 63/100 were women, where 23 of the 63 got the ZMapp treatment, and only 37 of the subjects were men, where 18 got the treatment.  My gut and intuition tells me that these groupings are too small for us to comfortably draw such conclusions.  **
+
+**Perhaps were we to develop and pre-specify the investigating of conditional average treatment effects for these two subgroups, I would be more inclined to support the small sample sizes, but this retrospective look makes this seem potentially brash to consider post-hoc.**
 
 h. Now, imagine that what described in part (g) did not happen, but that you had tested this heterogeneous treatment effect, and only this heterogeneous treatment effect, of your own accord. Would you be more or less inclined to believe that the heterogeneous treatment effect really exists? Why?
 
-```{r}
-
-```
+**I feel like my concerns from above still hold; that our sample size is too small to draw such a conclusion about the heterogeneous treatment effect and we should have developed a CATE protocol prior to running the study if we assumed as such.  **
 
 i. Another colleague proposes that being of African descent causes one to be more likely to get Ebola. He asks you what ideal experiment would answer this question. What would you tell him?  (*Hint: refer to Chapter 1 of Mostly Harmless Econometrics.*)
+
+**An ideal experiment would consist of blocking based upon ethnic heritage, including a block of individuals that were of African descent.   **
