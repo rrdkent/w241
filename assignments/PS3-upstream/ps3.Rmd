@@ -216,7 +216,7 @@ d. Which outcome measures in Table 4A show statistically significant effects (at
 
 e. Suppose that, during the two weeks before treatment, household A turns in 2kg per week more recyclables than household B does, and suppose that both households are otherwise identical (including being in the same treatment group).  From the model, how much more recycling do we predict household A to have than household B, per week, during the six weeks of treatment?   Provide only a point estimate, as the confidence interval would be a bit complicated.  This question is designed to test your understanding of slope coefficients in regression.
 
-
+**I believe that we want to look at the coefficent in the third column, Avg. weight of recyclables turned in per week, and the row that says Average weight of recyclables turned in per week, baseline.  Here we see a statistically signficant .281 coefficent with an SE of .011.  My understanding is that this would mean that with every incremental kg of recyclables turned in per week from the baseline, there would be an increase of that weight of recyclables times the coefficent, .281.  Consequently, there would be a 2kg * .281 or 5.62kg increase of recyclables turned in by Household A versus Household B, holding everything else constant.**
 
 f. Suppose that the variable "percentage of visits turned in bag, baseline" had been left out of the regression reported in Column 1.  What would you expect to happen to the results on providing a recycling bin?  Would you expect an increase or decrease in the estimated ATE?  Would you expect an increase or decrease in the standard error?  Explain your reasoning.
 
