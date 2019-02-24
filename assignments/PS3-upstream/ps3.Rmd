@@ -100,13 +100,14 @@ confint(lm, level=.95)
 
 b. What are the clusters in Broockman and Green's study? Why might taking clustering into account increase the standard errors?
 
-**On page 266, the authors supply a few example clusters: "24 year old males in SF, 24 year old males in Palo Alto, 25 year old females in SF).  So consquently, it appears that they clustered on Age by Gender by Residence Location.  Thi is what they say on page 267: "We then generated clusters of individuals with unique combinations of age, gender, and location)."  I believe that clustering by some variables can reduce standard error by adjusting for one of the sources of deviation in our results, but may be overcome by the effect with something like when reducing the sample size for one of the cluster split conditions.  For example, if there was a discernable treatment affect among men versus women, but when clustered on men versus women, there are more men in a location than women in a location and when we adjust for one source of devation in the results by gender, we increased it by reducing the effective sample size, hypothetically speaking. **
+**On page 266, the authors supply a few example clusters: "24 year old males in SF, 24 year old males in Palo Alto, 25 year old females in SF).  So consquently, it appears that they clustered on Age by Gender by Residence Location.  This is what they say on page 267: "We then generated clusters of individuals with unique combinations of age, gender, and location)."  I believe that clustering by some variables can reduce standard error by adjusting for one of the sources of deviation in our results, but may be overcome by the effect with something like when reducing the sample size for one of the cluster split conditions.  For example, if there was a discernable treatment affect among men versus women, but when clustered on men versus women, there are more men in a location than women in a location and when we adjust for one source of devation in the results by gender, we increased it by reducing the effective sample size, hypothetically speaking. **
 
 c. Now repeat part (a), but taking clustering into account. That is, compute a confidence interval for the effect of the ad on candidate name recognition in Study 1, but now correctly accounting for the clustered nature of the treatment assignment. If you're not familiar with how to calculate these clustered and robust estimates, there is a demo worksheet that is available in our course repository: `./code/week5clusterAndRobust.Rmd`.
 ```{r}
 #Better load up some more packages!
 library(sandwich)
 library(multiwayvcov)
+library(lmtest)
 ```
 
 ```{r}
@@ -160,16 +161,29 @@ $-.16 \pm 1.96 * .027$
 
 f. Now, repeat part (e) but include a dummy variable (a 0/1 binary variable) for whether the data are from Study 1 or Study 2. What is the treatment effect estimate and associated p-value?
 
+**I think we can create a dummy variable for study1/2 if we subtract one from the value.**
+
 ```{r}
 dependent <- dt$name_recall
 independent <- dt$treat_ad
-lm <- lm(dependent ~ independent + 1-dt$studyno, data=dt )
+lm <- lm(dependent ~ independent + (dt$studyno-1), data=dt )
 
 lm$cluster4.vcov <- cluster.vcov(model = lm, cluster = dt$cluster)
 coeftest(lm, lm$cluster4.vcov)
 ```
+**Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent (treatment effect) of approximately .295 and a SE of .008. Thus our 95% confidence interval is calculated:**
+
+$.295 \pm 1.96 * .008$
+
+**And our 95% confidence interval is between .27932 and .31068 with a distance of .03136**
+
+**The p-value associated with the treatment effect is a super-miniscule .00000000000000022**
+
 
 g. Why did the results from parts (e) and (f) differ? Which result is biased, and why? (Hint: see pages 75-76 of Gerber and Green, with more detailed discussion optionally available on pages 116-121.)
+
+**As Gerber and Green point out, estimating the overall ATE via a weighted average of each block is not equivalent to the comparison of average outcomes among all subjects in treatment and control.  When the probabilty of being assigned to the treatment or control group varies by block (which is our case), compariong the means for all subjects will yield a biased estimate of the ATE.  Thus, Part e is biased.**
+
 
 h. Skim this [Facebook case study](https://www.facebook.com/notes/us-politics-on-facebook/case-study-reaching-voters-with-facebook-ads-vote-no-on-8/10150257619200882) and consider two claims they make reprinted below. Why might their results differ from Broockman and Green's? Please be specific and provide examples.
 
