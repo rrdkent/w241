@@ -46,7 +46,7 @@ d <- read.csv("./data/broockman_green_anon_pooled_fb_users_only.csv")
 **First, let's look at what we have in our data**
 
 ```{r}
-d
+head(d)
 ```
 **Awesome, lots of data to work with, but phew, let's try to get some parameters to understand what we're working with.**
 
@@ -190,6 +190,12 @@ h. Skim this [Facebook case study](https://www.facebook.com/notes/us-politics-on
   + "There was a 19 percent difference in the way people voted in areas where Facebook Ads ran versus areas where the ads did not run."
   + "In the areas where the ads ran, people with the most online ad exposure were 17 percent more likely to vote against the proposition than those with the least."
 
+**One issue I see is that in the Facebook Case Study, the agency targted the two most populous counties in Florida, which are Dade and Broward.  These counties may be similar to comparing apples to oranges versus the Brockman and Green study which did not select counties based upon the population.  For instance, if a county has a high population (is urban), it might stand to reason that many of these individuals would be part of a specific socio-ethnic group that could impact the study based on heterogenous treatment effects or other concepts such as computer penetration, use of social media, etc.**
+
+**Additionally, there might be differences regarding the outcomes of what was being campagined - the Facebook Case Study was focused on a ballot initiative that impacted public schools and the Brockman and Green study was focused on specific candidates.  Thus, while a candidate might be most relevant to an entire population, the concept of public schools might be a "hot-button" issue for only those individuals who work in education or have kids who attend public schools; consequently the people may feel more pasionately/less passionately for the latter proposal versus the former.  **
+
+**Finally, the facebook study results were presented in percentages, versus nominal ATE.  This could hoodwink the reader by causing a case of misperception through the base rate fallacy.**
+
 # 2 Peruvian Recycling 
 
 Look at [this article](https://drive.google.com/file/d/0BxwM1dZBYvxBVzQtQW9nbmd2NGM/view?usp=sharing) about encouraging recycling in Peru.  The paper contains two experiments, a "participation study" and a "participation intensity study."  In this problem, we will focus on the latter study, whose results are contained in Table 4 in this problem.  You will need to read the relevant section of the paper (starting on page 20 of the manuscript) in order to understand the experimental design and variables.  (*Note that "indicator variable" is a synonym for "dummy variable," in case you haven't seen this language before.*)
@@ -250,7 +256,12 @@ d. In column (1) of Table 4B, which seems to have a stronger treatment effect, t
 
 e. Is this difference you just described statistically significant?  Explain which piece of information in the table allows you to answer this question.
 
+**No, I belive that the difference is not statistically signficant because while for both bins with a sticker and without a sticker, the coefficents are associated with an independent statistical signficance at least at the 5% level, highlighted by the double and triple asterisks, we'd want to see if their confidence levels overlap - if they do, there might not be a statistically significant difference.**
 
+$.055 \pm 1.96*(0.015)$ Conf int: .0256 and .0844
+$.035 \pm 1.96*(0.015)$ Conf int: .0056 and .0644 --> Overlap between .0256 and .0644.
+
+**Consequently, because of the standard error and the coefficent, we know that this difference is likely not statistically signficant.**
 
 f. Notice that Table 4C is described as results from "fully saturated" models.  What does this mean?  Looking at the list of variables in the table, explain in what sense the model is "saturated."
 

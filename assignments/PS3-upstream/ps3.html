@@ -11,7 +11,7 @@
 
 <meta name="author" content="Daniel Kent, Spring 2019" />
 
-<meta name="date" content="2019-02-16" />
+<meta name="date" content="2019-02-25" />
 
 <title>Problem Set 3</title>
 
@@ -187,7 +187,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Problem Set 3</h1>
 <h4 class="author"><em>Daniel Kent, Spring 2019</em></h4>
-<h4 class="date"><em>February 16, 2019</em></h4>
+<h4 class="date"><em>February 25, 2019</em></h4>
 
 </div>
 
@@ -217,6 +217,37 @@ library(foreign)</code></pre>
 <h1>1 Replicate Results</h1>
 <p>Skim <a href="http://link.springer.com/article/10.1007/s11109-013-9239-z">Broockman and Green’s</a> paper on the effects of Facebook ads and download an anonymized version of the data for Facebook users only.</p>
 <pre class="r"><code>d &lt;- read.csv(&quot;./data/broockman_green_anon_pooled_fb_users_only.csv&quot;)</code></pre>
+<p><strong>First, let’s look at what we have in our data</strong></p>
+<pre class="r"><code>head(d)</code></pre>
+<pre><code>##   studyno treat_ad                   cluster name_recall
+## 1       2        0 Study 2, Cluster Number 1           0
+## 2       2        0 Study 2, Cluster Number 2           1
+## 3       2        0 Study 2, Cluster Number 3           0
+## 4       2        0 Study 2, Cluster Number 4           1
+## 5       2        1 Study 2, Cluster Number 7           1
+## 6       2        1 Study 2, Cluster Number 7           0
+##   positive_impression
+## 1                   0
+## 2                   0
+## 3                   0
+## 4                   0
+## 5                   1
+## 6                   0</code></pre>
+<p><strong>Awesome, lots of data to work with, but phew, let’s try to get some parameters to understand what we’re working with.</strong></p>
+<pre class="r"><code>#Load it up in Data Table!
+dt &lt;- data.table(d)</code></pre>
+<pre class="r"><code>dt[,.(count= .N), studyno]</code></pre>
+<pre><code>##    studyno count
+## 1:       2  1342
+## 2:       1  1364</code></pre>
+<p><strong>We observe that we’re dealing with approximately 1350 observations in each study. But let’s slice it a bit more to see more detail:</strong></p>
+<pre class="r"><code>dt[,.(count= .N), by=list(studyno, treat_ad)]</code></pre>
+<pre><code>##    studyno treat_ad count
+## 1:       2        0  1007
+## 2:       2        1   335
+## 3:       1        1   805
+## 4:       1        0   559</code></pre>
+<p><strong>OK, for Study 1, there’s a 5:8 split, but with study two, there’s a 10:3 split in terms of control to treatment. Interesting and good to keep in mind.</strong></p>
 <ol style="list-style-type: lower-alpha">
 <li>Using regression without clustered standard errors (that is, ignoring the clustered assignment), compute a confidence interval for the effect of the ad on candidate name recognition in Study 1 only (the dependent variable is “name_recall”).</li>
 </ol>
@@ -224,45 +255,208 @@ library(foreign)</code></pre>
 <li><strong>Note</strong>: Ignore the blocking the article mentions throughout this problem.</li>
 <li><strong>Note</strong>: You will estimate something different than is reported in the study.</li>
 </ul>
+<p><strong>OK, so we filter for study 1, and then run a linear regression, regressing the dependent variable (name_recall) on the indepedent variable (treat_ad).</strong></p>
+<pre class="r"><code>dependent &lt;- dt[c(studyno==1),,]$name_recall
+independent &lt;- dt[c(studyno==1),,]$treat_ad</code></pre>
+<pre class="r"><code>lm &lt;- lm(dependent ~ independent, data=dt )</code></pre>
+<pre class="r"><code>lm_stat &lt;- summary(lm)
+lm_stat</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dependent ~ independent, data = dt)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.1825 -0.1825 -0.1727 -0.1727  0.8273 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  0.182469   0.016142  11.304   &lt;2e-16 ***
+## independent -0.009798   0.021012  -0.466    0.641    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3817 on 1362 degrees of freedom
+## Multiple R-squared:  0.0001596,  Adjusted R-squared:  -0.0005745 
+## F-statistic: 0.2174 on 1 and 1362 DF,  p-value: 0.6411</code></pre>
+<p><strong>And using the awesome trick we learned from PS2, we can use confint to get the confidence interval:</strong></p>
+<pre class="r"><code>confint(lm, level=.95)</code></pre>
+<pre><code>##                   2.5 %     97.5 %
+## (Intercept)  0.15080247 0.21413492
+## independent -0.05101765 0.03142188</code></pre>
+<p><strong>So we see that the confidence interval we get from the regression is (-.05 to .03). This means that there is a 95% probability that the true ATE falls within this range.</strong></p>
 <ol start="2" style="list-style-type: lower-alpha">
-<li><p>What are the clusters in Broockman and Green’s study? Why might taking clustering into account increase the standard errors?</p></li>
-<li><p>Now repeat part (a), but taking clustering into account. That is, compute a confidence interval for the effect of the ad on candidate name recognition in Study 1, but now correctly accounting for the clustered nature of the treatment assignment. If you’re not familiar with how to calculate these clustered and robust estimates, there is a demo worksheet that is available in our course repository: <code>./code/week5clusterAndRobust.Rmd</code>.</p></li>
-<li><p>Repeat part (c), but now for Study 2 only.</p></li>
-<li><p>Repeat part (c), but using the entire sample from both studies. Do not take into account which study the data is from (more on this in a moment), but just pool the data and run one omnibus regression. What is the treatment effect estimate and associated p-value?</p></li>
-<li><p>Now, repeat part (e) but include a dummy variable (a 0/1 binary variable) for whether the data are from Study 1 or Study 2. What is the treatment effect estimate and associated p-value?</p></li>
-<li><p>Why did the results from parts (e) and (f) differ? Which result is biased, and why? (Hint: see pages 75-76 of Gerber and Green, with more detailed discussion optionally available on pages 116-121.)</p></li>
-<li><p>Skim this <a href="https://www.facebook.com/notes/us-politics-on-facebook/case-study-reaching-voters-with-facebook-ads-vote-no-on-8/10150257619200882">Facebook case study</a> and consider two claims they make reprinted below. Why might their results differ from Broockman and Green’s? Please be specific and provide examples.</p></li>
+<li>What are the clusters in Broockman and Green’s study? Why might taking clustering into account increase the standard errors?</li>
+</ol>
+<p><strong>On page 266, the authors supply a few example clusters: “24 year old males in SF, 24 year old males in Palo Alto, 25 year old females in SF). So consquently, it appears that they clustered on Age by Gender by Residence Location. This is what they say on page 267:”We then generated clusters of individuals with unique combinations of age, gender, and location).&quot; I believe that clustering by some variables can reduce standard error by adjusting for one of the sources of deviation in our results, but may be overcome by the effect with something like when reducing the sample size for one of the cluster split conditions. For example, if there was a discernable treatment affect among men versus women, but when clustered on men versus women, there are more men in a location than women in a location and when we adjust for one source of devation in the results by gender, we increased it by reducing the effective sample size, hypothetically speaking. </strong></p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Now repeat part (a), but taking clustering into account. That is, compute a confidence interval for the effect of the ad on candidate name recognition in Study 1, but now correctly accounting for the clustered nature of the treatment assignment. If you’re not familiar with how to calculate these clustered and robust estimates, there is a demo worksheet that is available in our course repository: <code>./code/week5clusterAndRobust.Rmd</code>.</li>
+</ol>
+<pre class="r"><code>#Better load up some more packages!
+library(sandwich)
+library(multiwayvcov)
+library(lmtest)</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## 
+## Attaching package: 'zoo'</code></pre>
+<pre><code>## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre class="r"><code>head(dt$cluster)</code></pre>
+<pre><code>## [1] Study 2, Cluster Number 1 Study 2, Cluster Number 2
+## [3] Study 2, Cluster Number 3 Study 2, Cluster Number 4
+## [5] Study 2, Cluster Number 7 Study 2, Cluster Number 7
+## 1025 Levels: Study 1, Cluster Number 1 ... Study 2, Cluster Number 99</code></pre>
+<pre class="r"><code>lm$cluster1.vcov &lt;- cluster.vcov(model = lm, cluster = dt[c(studyno==1),,]$cluster)
+coeftest(lm, lm$cluster1.vcov)</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  0.1824687  0.0184915  9.8677   &lt;2e-16 ***
+## independent -0.0097979  0.0237536 -0.4125   0.6801    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<p><strong>Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent of approximately -.01 and a SE of .023. Thus our 95% confidence interval is calculated:</strong></p>
+<p><span class="math inline">\(-.01 \pm 1.96 * .0237536\)</span></p>
+<p><strong>And our 95% confidence interval is between -.9565571 and .0365571 with a distance of .0931141.</strong></p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Repeat part (c), but now for Study 2 only.</li>
+</ol>
+<pre class="r"><code>dependent &lt;- dt[c(studyno==2),,]$name_recall
+independent &lt;- dt[c(studyno==2),,]$treat_ad
+lm &lt;- lm(dependent ~ independent, data=dt )
+
+lm$cluster2.vcov &lt;- cluster.vcov(model = lm, cluster = dt[c(studyno==2),,]$cluster)
+coeftest(lm, lm$cluster2.vcov)</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  0.6057884  0.0181889  33.305   &lt;2e-16 ***
+## independent -0.0028033  0.0355033  -0.079   0.9371    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<p><strong>Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent of approximately -.003 and a SE of .036. Thus our 95% confidence interval is calculated:</strong></p>
+<p><span class="math inline">\(-.003 \pm 1.96 * .036\)</span></p>
+<p><strong>And our 95% confidence interval is between -.07356 and .06756 with a distance of .14112</strong></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Repeat part (c), but using the entire sample from both studies. Do not take into account which study the data is from (more on this in a moment), but just pool the data and run one omnibus regression. What is the treatment effect estimate and associated p-value?</li>
+</ol>
+<pre class="r"><code>dependent &lt;- dt$name_recall
+independent &lt;- dt$treat_ad
+lm &lt;- lm(dependent ~ independent, data=dt )
+
+lm$cluster3.vcov &lt;- cluster.vcov(model = lm, cluster = dt$cluster)
+coeftest(lm, lm$cluster3.vcov)</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##              Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)  0.454196   0.018576 24.4504 &lt; 2.2e-16 ***
+## independent -0.155073   0.026730 -5.8014 7.344e-09 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<p><strong>Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent (treatment effect) of approximately -.16 and a SE of .027. Thus our 95% confidence interval is calculated:</strong></p>
+<p><span class="math inline">\(-.16 \pm 1.96 * .027\)</span></p>
+<p><strong>And our 95% confidence interval is between -.21292 and -.10708 with a distance of .10584</strong></p>
+<p><strong>The p-value associated with the treatment effect is a miniscule .000000007344</strong></p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Now, repeat part (e) but include a dummy variable (a 0/1 binary variable) for whether the data are from Study 1 or Study 2. What is the treatment effect estimate and associated p-value?</li>
+</ol>
+<p><strong>I think we can create a dummy variable for study1/2 if we subtract one from the value.</strong></p>
+<pre class="r"><code>dependent &lt;- dt$name_recall
+independent &lt;- dt$treat_ad
+lm &lt;- lm(dependent ~ independent + (dt$studyno-1), data=dt )
+
+lm$cluster4.vcov &lt;- cluster.vcov(model = lm, cluster = dt$cluster)
+coeftest(lm, lm$cluster4.vcov)</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##               Estimate Std. Error t value  Pr(&gt;|t|)    
+## independent -0.0827663  0.0173636 -4.7666 1.973e-06 ***
+## dt$studyno   0.2951550  0.0082585 35.7397 &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<p><strong>Now correctly accounting for the clustered nature of the treatment assignment, we get a coefficent (treatment effect) of approximately .295 and a SE of .008. Thus our 95% confidence interval is calculated:</strong></p>
+<p><span class="math inline">\(.295 \pm 1.96 * .008\)</span></p>
+<p><strong>And our 95% confidence interval is between .27932 and .31068 with a distance of .03136</strong></p>
+<p><strong>The p-value associated with the treatment effect is a super-miniscule .00000000000000022</strong></p>
+<ol start="7" style="list-style-type: lower-alpha">
+<li>Why did the results from parts (e) and (f) differ? Which result is biased, and why? (Hint: see pages 75-76 of Gerber and Green, with more detailed discussion optionally available on pages 116-121.)</li>
+</ol>
+<p><strong>As Gerber and Green point out, estimating the overall ATE via a weighted average of each block is not equivalent to the comparison of average outcomes among all subjects in treatment and control. When the probabilty of being assigned to the treatment or control group varies by block (which is our case), compariong the means for all subjects will yield a biased estimate of the ATE. Thus, Part e is biased.</strong></p>
+<ol start="8" style="list-style-type: lower-alpha">
+<li>Skim this <a href="https://www.facebook.com/notes/us-politics-on-facebook/case-study-reaching-voters-with-facebook-ads-vote-no-on-8/10150257619200882">Facebook case study</a> and consider two claims they make reprinted below. Why might their results differ from Broockman and Green’s? Please be specific and provide examples.</li>
 </ol>
 <ul>
 <li>“There was a 19 percent difference in the way people voted in areas where Facebook Ads ran versus areas where the ads did not run.”</li>
 <li>“In the areas where the ads ran, people with the most online ad exposure were 17 percent more likely to vote against the proposition than those with the least.”</li>
 </ul>
+<p><strong>One issue I see is that in the Facebook Case Study, the agency targted the two most populous counties in Florida, which are Dade and Broward. These counties may be similar to comparing apples to oranges versus the Brockman and Green study which did not select counties based upon the population. For instance, if a county has a high population (is urban), it might stand to reason that many of these individuals would be part of a specific socio-ethnic group that could impact the study based on heterogenous treatment effects or other concepts such as computer penetration, use of social media, etc.</strong></p>
+<p><strong>Additionally, there might be differences regarding the outcomes of what was being campagined - the Facebook Case Study was focused on a ballot initiative that impacted public schools and the Brockman and Green study was focused on specific candidates. Thus, while a candidate might be most relevant to an entire population, the concept of public schools might be a “hot-button” issue for only those individuals who work in education or have kids who attend public schools; consequently the people may feel more pasionately/less passionately for the latter proposal versus the former. </strong></p>
+<p><strong>Finally, the facebook study results were presented in percentages, versus nominal ATE. This could hoodwink the reader by causing a case of misperception through the base rate fallacy.</strong></p>
 </div>
 <div id="peruvian-recycling" class="section level1">
 <h1>2 Peruvian Recycling</h1>
 <p>Look at <a href="https://drive.google.com/file/d/0BxwM1dZBYvxBVzQtQW9nbmd2NGM/view?usp=sharing">this article</a> about encouraging recycling in Peru. The paper contains two experiments, a “participation study” and a “participation intensity study.” In this problem, we will focus on the latter study, whose results are contained in Table 4 in this problem. You will need to read the relevant section of the paper (starting on page 20 of the manuscript) in order to understand the experimental design and variables. (<em>Note that “indicator variable” is a synonym for “dummy variable,” in case you haven’t seen this language before.</em>)</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>In Column 3 of Table 4A, what is the estimated ATE of providing a recycling bin on the average weight of recyclables turned in per household per week, during the six-week treatment period? Provide a 95% confidence interval.</p></li>
-<li><p>In Column 3 of Table 4A, what is the estimated ATE of sending a text message reminder on the average weight of recyclables turned in per household per week? Provide a 95% confidence interval.</p></li>
-<li><p>Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of providing a recycling bin?</p></li>
-<li><p>Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of sending text messages?</p></li>
-<li><p>Suppose that, during the two weeks before treatment, household A turns in 2kg per week more recyclables than household B does, and suppose that both households are otherwise identical (including being in the same treatment group). From the model, how much more recycling do we predict household A to have than household B, per week, during the six weeks of treatment? Provide only a point estimate, as the confidence interval would be a bit complicated. This question is designed to test your understanding of slope coefficients in regression.</p></li>
-<li><p>Suppose that the variable “percentage of visits turned in bag, baseline” had been left out of the regression reported in Column 1. What would you expect to happen to the results on providing a recycling bin? Would you expect an increase or decrease in the estimated ATE? Would you expect an increase or decrease in the standard error? Explain your reasoning.</p></li>
-<li><p>In column 1 of Table 4A, would you say the variable “has cell phone” is a bad control? Explain your reasoning.</p></li>
-<li><p>If we were to remove the “has cell phone” variable from the regression, what would you expect to happen to the coefficient on “Any SMS message”? Would it go up or down? Explain your reasoning.</p></li>
+<li>In Column 3 of Table 4A, what is the estimated ATE of providing a recycling bin on the average weight of recyclables turned in per household per week, during the six-week treatment period? Provide a 95% confidence interval.</li>
 </ol>
+<p><strong>We observe that by providing any bin, there is a statistically signfiicant increase in estimated ATE of average weight of recyclables turned in per week of .187 kg during the six week period. To calculate the 95% confidence interval for the estimated ATE, we take the estimated ATE coefficent +/- two standard errors. That is:</strong></p>
+<p>$0.187 1.96*(0.032) = $ <strong>-0.12428 to 0.24972</strong></p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>In Column 3 of Table 4A, what is the estimated ATE of sending a text message reminder on the average weight of recyclables turned in per household per week? Provide a 95% confidence interval.</li>
+</ol>
+<p><strong>We observe that any SMS message results in a non-statistically signficant decrease in estimated ATE of average weight of recyclables turned in per week of .024 (i.e. a -.024 gain) kg during the six week period. To calculate the 95% confidence interval for the estimated ATE, we take the estimated ATE coefficent +/- two standard errors. That is:</strong></p>
+<p>$-0.024 1.96*(0.039) = $ <strong>-.10044 to .05244</strong></p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of providing a recycling bin?</li>
+</ol>
+<p><strong>According to the Notes, any coefficent with at least two asterisks represents signficance at the 5% confidence level. Consequently for the providing of a recycling bin (i.e. any bin), the percent of visits turned in bag, average number of bins turned in per week, average weight of recyclables turned in per week, and average market value of recyclables given per week all showed statistically signficant effects at the 5% level of providing a recycling bin. (Columns 1,2,3 and 4)</strong></p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of sending text messages?</li>
+</ol>
+<p><strong>Based on the same notes described above in part c, no outcome measured show statistically signficant effects at the 5% level when sending text messages.</strong></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Suppose that, during the two weeks before treatment, household A turns in 2kg per week more recyclables than household B does, and suppose that both households are otherwise identical (including being in the same treatment group). From the model, how much more recycling do we predict household A to have than household B, per week, during the six weeks of treatment? Provide only a point estimate, as the confidence interval would be a bit complicated. This question is designed to test your understanding of slope coefficients in regression.</li>
+</ol>
+<p><strong>I believe that we want to look at the coefficent in the third column, Avg. weight of recyclables turned in per week, and the row that says Average weight of recyclables turned in per week, baseline. Here we see a statistically signficant .281 coefficent with an SE of .011. My understanding is that this would mean that with every incremental kg of recyclables turned in per week from the baseline, there would be an increase of that weight of recyclables times the coefficent, .281. Consequently, there would be a 2kg * .281 or 5.62kg increase of recyclables turned in by Household A versus Household B, holding everything else constant.</strong></p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Suppose that the variable “percentage of visits turned in bag, baseline” had been left out of the regression reported in Column 1. What would you expect to happen to the results on providing a recycling bin? Would you expect an increase or decrease in the estimated ATE? Would you expect an increase or decrease in the standard error? Explain your reasoning.</li>
+</ol>
+<p>**In column one, the variable “percentage of visits turne din bag, baseline was the highest magnitude coefficent. I believe this means that if we turn the SMS variable (i.e. no SMS), the has cellphone (i.e. doesn’t have a cellphone), and any bin(i.e. no bin) off, our baseline would be that .374 percent of visits to households resulted in the turning in of a bag. Because this is a higher magnitude than the other variables, I believe we can deduce that this is the key driver in the estimated ATE. If it was left out, I would suspect that some of the magnitude would be distributed proportionally to the other included variables though the overall estimated ATE would go down because we don’t have as precise a model to estimate ATE. I would also expect the Standard Error to increase because our pecision with which the regression coeffcient is esimated would be reduced. That is, our less precise esimate of the coefficent would result in a higher SE because a major input of the response variable yielding a more precise model is removed. **</p>
+<ol start="7" style="list-style-type: lower-alpha">
+<li>In column 1 of Table 4A, would you say the variable “has cell phone” is a bad control? Explain your reasoning.</li>
+</ol>
+<p><strong>I would say it is a non-optimal control because as the authors mentioned on page 18 themselves, that the cellphone control is correlated with SMS message assignment. Basically, to my knowlege, since there is no other straightforward way to recieve an SMS without a cellphone, there would be a 1:1 relationship of individuals who recieve any SMS message and have a cell phone. Consequently this might lead to interference among the coefficents because of the lack of independence of each control.</strong></p>
+<ol start="8" style="list-style-type: lower-alpha">
+<li>If we were to remove the “has cell phone” variable from the regression, what would you expect to happen to the coefficient on “Any SMS message”? Would it go up or down? Explain your reasoning.</li>
+</ol>
+<p><strong>I would expect that the overall precision of the model to go down, but the coefficent on “Any SMS message” would increase, as some of the cell phone coefficent would load onto the “Any SMS Message” coefficent. This might be because cell phones provide some explanation with respect to the participant population, but because they are highly correlated with the “any SMS message,” they we would eliminate some of the interference we discussed in part g. For instance, the cell phone might indicate other things than ability to accept SMS messages, like class (maybe more middle class residents have cell phones than lower class individuals) and this would otherwise not be included to the same degree in the regression if we eliminated the cell phone variable. It would instead partially load onto the SMS variable, as sort of more of a catch-all for the nuance breakout we get from the cellphone variable. </strong></p>
 </div>
 <div id="multifactor-experiments" class="section level1">
 <h1>3 Multifactor Experiments</h1>
 <p>Staying with the same experiment, now lets think about multifactor experiments.</p>
 <ol style="list-style-type: lower-alpha">
-<li>What is the full experimental design for this experiment? Tell us the dimensions, such as 2x2x3. (Hint: the full results appear in Panel 4B.)</li>
-<li>In the results of Table 4B, describe the baseline category. That is, in English, how would you describe the attributes of the group of people for whom all dummy variables are equal to zero?</li>
-<li>In column (1) of Table 4B, interpret the magnitude of the coefficient on “bin without sticker.” What does it mean?</li>
-<li>In column (1) of Table 4B, which seems to have a stronger treatment effect, the recycling bin with message sticker, or the recycling bin without sticker? How large is the magnitude of the estimated difference?</li>
-<li>Is this difference you just described statistically significant? Explain which piece of information in the table allows you to answer this question.</li>
-<li>Notice that Table 4C is described as results from “fully saturated” models. What does this mean? Looking at the list of variables in the table, explain in what sense the model is “saturated.”</li>
+<li><p>What is the full experimental design for this experiment? Tell us the dimensions, such as 2x2x3. (Hint: the full results appear in Panel 4B.) <strong>Bin without sticker, bin with a sticker, (didn’t recieve a bin); got an generic SMS message, got a personal SMS message, (didn’t get an SMS message) and <em>grumble</em> Has a Cell phone, (Doesn’t have a cell phone). Consequently the dimensions are 3x3x2, one dimension regarding the bin/sticker, one regarding the SMS message, and one for the cell phone.</strong></p></li>
+<li><p>In the results of Table 4B, describe the baseline category. That is, in English, how would you describe the attributes of the group of people for whom all dummy variables are equal to zero?</p></li>
 </ol>
+<p><strong>Recognizing that we have 3x3x2 dimensions, and in Table 4B, there are only five of treatment coefficents labled, we look for what is missing. With respect to the bin dimension, we see bin with a sticker, and bin without a sticker, so then the remaining option which would be associated with a “zero” dummy variable is “no bin” provided. With respect to the other dimension, SMS messages, we see the personal SMS message, and generic SMS message, so the remaining option also associated with the “Zero” dummy variable is “no SMS” sent. Finally, the last variable is “has cell phone” so the other dimension is “Doesn’t have a cell phone.” So our baseline is more or less like a control - no bin, no sms, no cell phone (I.e. no treatment/interference). </strong></p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>In column (1) of Table 4B, interpret the magnitude of the coefficient on “bin without sticker.” What does it mean?</li>
+</ol>
+<p><strong>In column (1) of Table 4B, which is the percentage of visits turned in bag, the “bin without sticker” is associated with a coefficent of 0.035, a SE of 0.015, and two asterisks. This means that relative to the baseline (no bin, no SMS), providing the user with just a bin without a sticker resulted in a statistically signficant average estimated treatment effect of .035 at the 5% level. Said another way, providing a bin without a sticker made 3.5% more households turn in a bag.</strong></p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>In column (1) of Table 4B, which seems to have a stronger treatment effect, the recycling bin with message sticker, or the recycling bin without sticker? How large is the magnitude of the estimated difference?</li>
+</ol>
+<p><strong>Observing the coefficents associated with the different treatmetns of “bin with sticker” and “bin without sticker” with respect to the percengae of visits where households turned in a bag, we observe that bin with sticker has a stronger treatment effect with a statistically signficant effect at the 1% level of .055 with a SE of .015, whereas the bin without a sticker has as statistically significant effect of .035 with an SE also of .015 at the 5% level. The magnitude is the difference in ATEs since there is no interaciton term, so the magnitude difference is .02.</strong></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li><p>Is this difference you just described statistically significant? Explain which piece of information in the table allows you to answer this question.</p></li>
+<li><p>Notice that Table 4C is described as results from “fully saturated” models. What does this mean? Looking at the list of variables in the table, explain in what sense the model is “saturated.”</p></li>
+</ol>
+<p><strong>I believe a fully saturated model is a model that includes nearly every single possible coefficent, in a model, except for one. For example, we have No SMS message, for the bin with sticker, bin, and no bin, (all of the bin options); pesronalized SMS for the bin, bin with sticker and no bin (all of the bin options); and generic SMS message for bin and no bin. Uh oh, so we’re missing Generic SMS message with bin and sticker, so that would be the “base case”. Consequently with that in mind, everything else is included so we can see the load on each coefficent and hence we call the model saturated.</strong></p>
 </div>
 <div id="now-do-it-with-data" class="section level1">
 <h1>4 Now! Do it with data</h1>
@@ -284,16 +478,807 @@ head(d)</code></pre>
 ## 5     0     0
 ## 6     0     0</code></pre>
 <pre class="r"><code>## Do some quick exploratory data analysis with this data. There are some values in this data that seem a bit strange. Determine what these are, and figure out what you would like to do with them. Also, notice what happens with your estimates vis-a-vis the estimates that are produced by the authors when you do something sensible with this strange values. </code></pre>
+<pre class="r"><code>dt &lt;- data.table(d)</code></pre>
+<pre class="r"><code>dt[,.N,]</code></pre>
+<pre><code>## [1] 1785</code></pre>
+<p><strong>OK, we’re dealing with 1785 individual observations.</strong></p>
+<pre class="r"><code>summary(dt)</code></pre>
+<pre><code>##      street           havecell      avg_bins_treat   base_avg_bins_treat
+##  Min.   :-999.00   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000     
+##  1st Qu.:  69.00   1st Qu.:0.0000   1st Qu.:0.4167   1st Qu.:0.3750     
+##  Median : 131.50   Median :1.0000   Median :0.6250   Median :0.6250     
+##  Mean   :  68.81   Mean   :0.5908   Mean   :0.6811   Mean   :0.7363     
+##  3rd Qu.: 215.00   3rd Qu.:1.0000   3rd Qu.:0.8333   3rd Qu.:1.0000     
+##  Max.   : 263.00   Max.   :1.0000   Max.   :4.1667   Max.   :6.3750     
+##  NA's   :3         NA's   :1                                            
+##       bin              sms             bin_s            bin_g       
+##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median :0.0000   Median :0.0000   Median :0.0000   Median :0.0000  
+##  Mean   :0.3378   Mean   :0.3087   Mean   :0.1681   Mean   :0.1697  
+##  3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.0000   3rd Qu.:0.0000  
+##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+##                                                                     
+##      sms_p            sms_g       
+##  Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median :0.0000   Median :0.0000  
+##  Mean   :0.1557   Mean   :0.1529  
+##  3rd Qu.:0.0000   3rd Qu.:0.0000  
+##  Max.   :1.0000   Max.   :1.0000  
+## </code></pre>
+<p><strong>We see from our data that there are three NA values in the street feature, and 1 NA value in the havecell feature. I’m recommending to drop these because I am assuming that if there is an error in the data collection for these values, the rest of the data is suspect.</strong></p>
+<pre class="r"><code>hist(dt$street)</code></pre>
+<p><img src="data:image/png;base64,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" width="672" /> <strong>Additionally, we see some values in Street with -999. I am going to drop these as well for similar reasons as to the NA.</strong></p>
+<p><strong>Everything else, generally, looks ok.</strong></p>
+<pre class="r"><code>dt &lt;- dt[dt$street&gt;=0 &amp; havecell&gt;=0,,]</code></pre>
+<pre class="r"><code>summary(dt)</code></pre>
+<pre><code>##      street         havecell    avg_bins_treat   base_avg_bins_treat
+##  Min.   :  2.0   Min.   :0.00   Min.   :0.0000   Min.   :0.0000     
+##  1st Qu.: 78.0   1st Qu.:0.00   1st Qu.:0.4167   1st Qu.:0.3750     
+##  Median :149.0   Median :1.00   Median :0.6250   Median :0.6250     
+##  Mean   :145.9   Mean   :0.59   Mean   :0.6815   Mean   :0.7353     
+##  3rd Qu.:217.0   3rd Qu.:1.00   3rd Qu.:0.8333   3rd Qu.:1.0000     
+##  Max.   :263.0   Max.   :1.00   Max.   :4.1667   Max.   :6.3750     
+##       bin              sms            bin_s            bin_g       
+##  Min.   :0.0000   Min.   :0.000   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.:0.000   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median :0.0000   Median :0.000   Median :0.0000   Median :0.0000  
+##  Mean   :0.3438   Mean   :0.307   Mean   :0.1734   Mean   :0.1704  
+##  3rd Qu.:1.0000   3rd Qu.:1.000   3rd Qu.:0.0000   3rd Qu.:0.0000  
+##  Max.   :1.0000   Max.   :1.000   Max.   :1.0000   Max.   :1.0000  
+##      sms_p            sms_g       
+##  Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median :0.0000   Median :0.0000  
+##  Mean   :0.1547   Mean   :0.1523  
+##  3rd Qu.:0.0000   3rd Qu.:0.0000  
+##  Max.   :1.0000   Max.   :1.0000</code></pre>
+<pre class="r"><code>dt[,.N,]</code></pre>
+<pre><code>## [1] 1661</code></pre>
 <ol style="list-style-type: lower-alpha">
-<li><p>For simplicity, let’s start by measuring the effect of providing a recycling bin, ignoring the SMS message treatment (and ignoring whether there was a sticker on the bin or not). Run a regression of Y on only the bin treatment dummy, so you estimate a simple difference in means. Provide a 95% confidence interval for the treatment effect.</p></li>
-<li><p>Now add the pre-treatment value of Y as a covariate. Provide a 95% confidence interval for the treatment effect. Explain how and why this confidence interval differs from the previous one.</p></li>
-<li><p>Now add the street fixed effects. (You’ll need to use the R command factor().) Provide a 95% confidence interval for the treatment effect.</p></li>
-<li><p>Recall that the authors described their experiment as “stratified at the street level,” which is a synonym for blocking by street. Explain why the confidence interval with fixed effects does not differ much from the previous one.</p></li>
-<li><p>Perhaps having a cell phone helps explain the level of recycling behavior. Instead of “has cell phone,” we find it easier to interpret the coefficient if we define the variable &quot; no cell phone.&quot; Give the R command to define this new variable, which equals one minus the “has cell phone” variable in the authors’ data set. Use “no cell phone” instead of “has cell phone” in subsequent regressions with this dataset.</p></li>
-<li><p>Now add “no cell phone” as a covariate to the previous regression. Provide a 95% confidence interval for the treatment effect. Explain why this confidence interval does not differ much from the previous one.</p></li>
-<li><p>Now let’s add in the SMS treatment. Re-run the previous regression with “any SMS” included. You should get the same results as in Table 4A. Provide a 95% confidence interval for the treatment effect of the recycling bin. Explain why this confidence interval does not differ much from the previous one.</p></li>
-<li><p>Now reproduce the results of column 2 in Table 4B, estimating separate treatment effects for the two types of SMS treatments and the two types of recycling-bin treatments. Provide a 95% confidence interval for the effect of the unadorned recycling bin. Explain how your answer differs from that in part (g), and explain why you think it differs.</p></li>
+<li>For simplicity, let’s start by measuring the effect of providing a recycling bin, ignoring the SMS message treatment (and ignoring whether there was a sticker on the bin or not). Run a regression of Y on only the bin treatment dummy, so you estimate a simple difference in means. Provide a 95% confidence interval for the treatment effect.</li>
 </ol>
+<pre class="r"><code>fit &lt;- lm(dt$avg_bins_treat ~ dt$bin , data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$avg_bins_treat ~ dt$bin, data = dt)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.7698 -0.2602 -0.0518  0.1885  3.5315 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  0.63515    0.01223  51.924  &lt; 2e-16 ***
+## dt$bin       0.13470    0.02086   6.456 1.41e-10 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.4039 on 1659 degrees of freedom
+## Multiple R-squared:  0.02451,    Adjusted R-squared:  0.02392 
+## F-statistic: 41.68 on 1 and 1659 DF,  p-value: 1.406e-10</code></pre>
+<p><strong>We recall that a 95% confidence interval is the coefficent +/- 1.96 * SE So:</strong></p>
+<p><span class="math inline">\(.1347 \pm 1.96 * .02086\)</span></p>
+<p><strong>The 95% confidence interval is between 0.0938144 and 0.1755856. Which means, there is a 95% probability that the true ATE falls between 0.0938144 and 0.1755856… or that this confdience interval will overlap with the population level treatment effect in 95 out of 100 times that the procedure is replicated, under the same sampling conditions.</strong></p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Now add the pre-treatment value of Y as a covariate. Provide a 95% confidence interval for the treatment effect. Explain how and why this confidence interval differs from the previous one.</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat, data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat, 
+##     data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.97116 -0.21375 -0.02318  0.16776  2.13259 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)             0.35441    0.01425  24.868  &lt; 2e-16 ***
+## dt$bin                  0.12711    0.01722   7.383 2.44e-13 ***
+## dt$base_avg_bins_treat  0.38535    0.01381  27.905  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3332 on 1658 degrees of freedom
+## Multiple R-squared:  0.3362, Adjusted R-squared:  0.3354 
+## F-statistic: 419.9 on 2 and 1658 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p><strong>We recall that a 95% confidence interval is the coefficent +/- 1.96 * SE So:</strong></p>
+<p><span class="math inline">\(.12711 \pm 1.96 * .01722\)</span></p>
+<p><strong>The 95% confidence interval is between .0933588 and .160861. Which means, there is a 95% probability that the true ATE falls between .0933588 and .160861… or that this confdience interval will overlap with the population level treatment effect in 95 out of 100 times that the procedure is replicated, under the same sampling conditions.</strong></p>
+<p><strong>Compared with the previous estimate, we see that our interval has decreased from .0817712 to .0675024, in addition to shifting down a bit. This confidence interval differs in that it is smaller because we are controlling for another variable (the base value, pre-treatment of Y), so that more the explanatory magnitude falls appropriately on the variables that break out the different effects more, leading to a reduction in standard error associated with the coefficent(thereby reducing the interval) since we are dealing with a more precise model.</strong></p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Now add the street fixed effects. (You’ll need to use the R command factor().) Provide a 95% confidence interval for the treatment effect.</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + factor(street), data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + 
+##     factor(street), data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.42645 -0.19281 -0.01686  0.16072  1.86953 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)             0.2761452  0.0979261   2.820 0.004867 ** 
+## dt$bin                  0.1160641  0.0176099   6.591 6.07e-11 ***
+## dt$base_avg_bins_treat  0.3669578  0.0147709  24.843  &lt; 2e-16 ***
+## factor(street)3         0.0505660  0.1413142   0.358 0.720524    
+## factor(street)4        -0.0413983  0.1453562  -0.285 0.775833    
+## factor(street)5         0.0011216  0.1453437   0.008 0.993844    
+## factor(street)6         0.0442730  0.1503140   0.295 0.768389    
+## factor(street)7         0.0388734  0.1744273   0.223 0.823673    
+## factor(street)8         0.0407896  0.1302853   0.313 0.754264    
+## factor(street)9         0.0082076  0.1349771   0.061 0.951521    
+## factor(street)10        0.0679267  0.1225271   0.554 0.579402    
+## factor(street)11        0.0272125  0.1352207   0.201 0.840535    
+## factor(street)15        0.0741247  0.1889864   0.392 0.694950    
+## factor(street)17        0.1349727  0.1641210   0.822 0.410983    
+## factor(street)20       -0.1377622  0.1504508  -0.916 0.359993    
+## factor(street)21        0.0177666  0.1641569   0.108 0.913829    
+## factor(street)22       -0.0298983  0.1156727  -0.258 0.796078    
+## factor(street)23       -0.0638941  0.1177896  -0.542 0.587595    
+## factor(street)26        0.0696100  0.2107055   0.330 0.741170    
+## factor(street)32        0.2504634  0.2107280   1.189 0.234802    
+## factor(street)37        0.2673750  0.1744992   1.532 0.125676    
+## factor(street)38        0.0223127  0.1744275   0.128 0.898230    
+## factor(street)40        0.0337240  0.2107826   0.160 0.872908    
+## factor(street)41        0.1088629  0.1744597   0.624 0.532724    
+## factor(street)42       -0.0535698  0.2107958  -0.254 0.799429    
+## factor(street)43        0.1480805  0.1744210   0.849 0.396028    
+## factor(street)44        0.2291915  0.1503031   1.525 0.127507    
+## factor(street)45        0.0551281  0.1888010   0.292 0.770335    
+## factor(street)46        0.1070460  0.1641766   0.652 0.514491    
+## factor(street)47        0.5185747  0.1891575   2.741 0.006190 ** 
+## factor(street)53        0.1321706  0.2106366   0.627 0.530440    
+## factor(street)58        0.0646041  0.1324919   0.488 0.625900    
+## factor(street)60        0.1225841  0.1266497   0.968 0.333253    
+## factor(street)61        0.0853744  0.2110069   0.405 0.685827    
+## factor(street)62        0.1524973  0.1563694   0.975 0.329602    
+## factor(street)63        0.0655447  0.1502548   0.436 0.662738    
+## factor(street)64        0.1467600  0.1641345   0.894 0.371390    
+## factor(street)66        0.0356481  0.1563689   0.228 0.819698    
+## factor(street)67        0.0834804  0.1453874   0.574 0.565924    
+## factor(street)68        0.1680898  0.1502563   1.119 0.263455    
+## factor(street)69        0.1728585  0.1379698   1.253 0.210450    
+## factor(street)70        0.0861086  0.1302902   0.661 0.508780    
+## factor(street)72        0.0502082  0.1380116   0.364 0.716062    
+## factor(street)73       -0.0760441  0.1503173  -0.506 0.613009    
+## factor(street)74        0.0291038  0.1213819   0.240 0.810541    
+## factor(street)75        0.0377228  0.1349974   0.279 0.779951    
+## factor(street)77        0.0609375  0.1564266   0.390 0.696918    
+## factor(street)78        0.0426430  0.1266500   0.337 0.736391    
+## factor(street)79        0.4020718  0.1888568   2.129 0.033421 *  
+## factor(street)80        0.1068185  0.1156742   0.923 0.355927    
+## factor(street)81        0.0615651  0.1888667   0.326 0.744492    
+## factor(street)82        0.1268644  0.2107252   0.602 0.547241    
+## factor(street)83       -0.0263435  0.1566875  -0.168 0.866506    
+## factor(street)84        0.0768420  0.1563378   0.492 0.623137    
+## factor(street)85        0.1595347  0.1266489   1.260 0.207990    
+## factor(street)86        0.0295295  0.1226093   0.241 0.809710    
+## factor(street)88       -0.0007989  0.1413653  -0.006 0.995492    
+## factor(street)89        0.0896628  0.1503132   0.597 0.550928    
+## factor(street)91       -0.1177081  0.2106337  -0.559 0.576363    
+## factor(street)93        0.0243957  0.1563558   0.156 0.876033    
+## factor(street)94        0.0564087  0.1453768   0.388 0.698059    
+## factor(street)96        0.0553585  0.1563592   0.354 0.723354    
+## factor(street)98        0.1472731  0.1351000   1.090 0.275845    
+## factor(street)99        0.3263651  0.1455217   2.243 0.025062 *  
+## factor(street)100       0.1728747  0.1415513   1.221 0.222172    
+## factor(street)101       0.2941672  0.1454326   2.023 0.043283 *  
+## factor(street)102       0.0192946  0.2117854   0.091 0.927422    
+## factor(street)103       0.1799488  0.1453467   1.238 0.215888    
+## factor(street)105       0.2129932  0.1745108   1.221 0.222464    
+## factor(street)106       0.4959513  0.1350190   3.673 0.000248 ***
+## factor(street)107       0.1602545  0.1888154   0.849 0.396165    
+## factor(street)109       0.0815379  0.1502912   0.543 0.587533    
+## factor(street)110       0.2363847  0.1744384   1.355 0.175587    
+## factor(street)111       0.0980077  0.1744880   0.562 0.574414    
+## factor(street)112       0.2840673  0.1505883   1.886 0.059439 .  
+## factor(street)113       0.1776071  0.1566009   1.134 0.256920    
+## factor(street)115       0.3896666  0.1350929   2.884 0.003978 ** 
+## factor(street)117       0.6636662  0.2122053   3.127 0.001798 ** 
+## factor(street)118       0.1293686  0.2106588   0.614 0.539234    
+## factor(street)119       0.0853025  0.1503141   0.567 0.570464    
+## factor(street)120       0.0294091  0.1503476   0.196 0.844944    
+## factor(street)121       0.2768029  0.1505016   1.839 0.066086 .  
+## factor(street)122      -0.0637493  0.1888629  -0.338 0.735756    
+## factor(street)124       0.1345711  0.1378936   0.976 0.329271    
+## factor(street)125       0.3996890  0.1272343   3.141 0.001715 ** 
+## factor(street)126      -0.0040099  0.1645758  -0.024 0.980565    
+## factor(street)127       0.1736553  0.1645780   1.055 0.291526    
+## factor(street)128       0.2415746  0.1350640   1.789 0.073885 .  
+## factor(street)129       0.4739654  0.2108342   2.248 0.024720 *  
+## factor(street)130       0.2732824  0.1503850   1.817 0.069386 .  
+## factor(street)131       0.3753228  0.1507911   2.489 0.012919 *  
+## factor(street)132       0.3331701  0.1286646   2.589 0.009707 ** 
+## factor(street)133       0.4114377  0.1888639   2.178 0.029527 *  
+## factor(street)134       0.0869171  0.1565116   0.555 0.578746    
+## factor(street)136       0.2799097  0.1505580   1.859 0.063204 .  
+## factor(street)137       0.3515908  0.2106588   1.669 0.095328 .  
+## factor(street)138       0.2200732  0.1384773   1.589 0.112221    
+## factor(street)147       0.2879270  0.2107472   1.366 0.172078    
+## factor(street)148       0.2019212  0.1888154   1.069 0.285059    
+## factor(street)149       0.3798725  0.1457037   2.607 0.009221 ** 
+## factor(street)151      -0.1638204  0.2109091  -0.777 0.437439    
+## factor(street)152       0.2197070  0.2106168   1.043 0.297045    
+## factor(street)153       0.0696100  0.2107055   0.330 0.741170    
+## factor(street)154       0.0355805  0.1413054   0.252 0.801232    
+## factor(street)155      -0.1484092  0.2106588  -0.705 0.481232    
+## factor(street)156       0.2905525  0.2106138   1.380 0.167933    
+## factor(street)157       0.2408824  0.1890120   1.274 0.202712    
+## factor(street)158       0.4923750  0.1744992   2.822 0.004842 ** 
+## factor(street)160      -0.0268491  0.1378867  -0.195 0.845640    
+## factor(street)163       0.0157202  0.1564268   0.100 0.919964    
+## factor(street)164      -0.0027601  0.1744242  -0.016 0.987377    
+## factor(street)165       0.1023135  0.1889925   0.541 0.588339    
+## factor(street)166      -0.0511870  0.2106588  -0.243 0.808051    
+## factor(street)168       0.2437562  0.2109999   1.155 0.248177    
+## factor(street)170       0.0893236  0.1284410   0.695 0.486886    
+## factor(street)171       0.0488373  0.1641402   0.298 0.766101    
+## factor(street)172       0.0707283  0.1503022   0.471 0.638014    
+## factor(street)175       0.3459145  0.1324845   2.611 0.009119 ** 
+## factor(street)179       0.1009483  0.1889616   0.534 0.593265    
+## factor(street)180      -0.0008258  0.1204432  -0.007 0.994531    
+## factor(street)182      -0.0505141  0.1641171  -0.308 0.758283    
+## factor(street)183       0.0124584  0.1214484   0.103 0.918309    
+## factor(street)185       0.0329075  0.1641126   0.201 0.841103    
+## factor(street)186       0.1008820  0.1503946   0.671 0.502464    
+## factor(street)187       0.0840212  0.1302907   0.645 0.519108    
+## factor(street)188       0.0673558  0.1453733   0.463 0.643196    
+## factor(street)189       0.0402341  0.1203745   0.334 0.738245    
+## factor(street)190       0.1053748  0.1504876   0.700 0.483899    
+## factor(street)191       0.0798253  0.1453437   0.549 0.582939    
+## factor(street)192      -0.0096192  0.1163220  -0.083 0.934106    
+## factor(street)193       0.1582192  0.1503141   1.053 0.292700    
+## factor(street)196      -0.1303779  0.1642063  -0.794 0.427329    
+## factor(street)197       0.1682332  0.2106881   0.798 0.424712    
+## factor(street)198       0.1803945  0.1284477   1.404 0.160404    
+## factor(street)200       0.0507821  0.1564434   0.325 0.745527    
+## factor(street)202       0.1053217  0.1746071   0.603 0.546473    
+## factor(street)203      -0.1303425  0.1563558  -0.834 0.404626    
+## factor(street)206      -0.1415574  0.1413584  -1.001 0.316793    
+## factor(street)207      -0.1427886  0.1888010  -0.756 0.449595    
+## factor(street)208      -0.0207241  0.1413584  -0.147 0.883463    
+## factor(street)209      -0.2133688  0.1325220  -1.610 0.107597    
+## factor(street)210      -0.1312847  0.1415290  -0.928 0.353758    
+## factor(street)213       0.1372066  0.1350977   1.016 0.309981    
+## factor(street)215       0.0373590  0.1135376   0.329 0.742168    
+## factor(street)216      -0.3515156  0.1759400  -1.998 0.045907 *  
+## factor(street)217      -0.0845579  0.1502700  -0.563 0.573720    
+## factor(street)220      -0.1100836  0.1563432  -0.704 0.481472    
+## factor(street)221      -0.0544156  0.1453881  -0.374 0.708251    
+## factor(street)222      -0.0803151  0.1744136  -0.460 0.645235    
+## factor(street)223      -0.0829403  0.1503345  -0.552 0.581234    
+## factor(street)225       0.0050526  0.1455381   0.035 0.972310    
+## factor(street)227       0.0496890  0.1744684   0.285 0.775836    
+## factor(street)228       0.1433788  0.2106199   0.681 0.496138    
+## factor(street)229       0.1370082  0.1648917   0.831 0.406165    
+## factor(street)230       0.1060271  0.1564049   0.678 0.497940    
+## factor(street)232       0.1730376  0.1890159   0.915 0.360096    
+## factor(street)233       0.1468207  0.1349779   1.088 0.276888    
+## factor(street)235      -0.0192812  0.1745090  -0.110 0.912037    
+## factor(street)236       0.0814638  0.1237519   0.658 0.510459    
+## factor(street)238      -0.0144368  0.1453707  -0.099 0.920906    
+## factor(street)240      -0.2020254  0.1744074  -1.158 0.246907    
+## factor(street)241      -0.0093410  0.1888380  -0.049 0.960555    
+## factor(street)242       0.1349727  0.2106216   0.641 0.521732    
+## factor(street)243       0.2522588  0.1889839   1.335 0.182142    
+## factor(street)244       0.1851309  0.1302822   1.421 0.155528    
+## factor(street)246      -0.0426043  0.1642633  -0.259 0.795389    
+## factor(street)247       0.0930582  0.1325007   0.702 0.482588    
+## factor(street)248       0.0899696  0.1170122   0.769 0.442081    
+## factor(street)249       0.1828708  0.1266888   1.443 0.149101    
+## factor(street)250       0.1412563  0.1118391   1.263 0.206777    
+## factor(street)253       0.2040057  0.1251248   1.630 0.103226    
+## factor(street)254       0.1977383  0.1565323   1.263 0.206701    
+## factor(street)255       0.1225908  0.1284542   0.954 0.340061    
+## factor(street)256       0.1227641  0.1132384   1.084 0.278488    
+## factor(street)257      -0.0063413  0.1238865  -0.051 0.959184    
+## factor(street)258       0.1905219  0.1203751   1.583 0.113695    
+## factor(street)259       0.7976129  0.2107826   3.784 0.000160 ***
+## factor(street)260       0.0640570  0.1126272   0.569 0.569611    
+## factor(street)261       0.0511237  0.1503856   0.340 0.733942    
+## factor(street)262       0.1308689  0.1453818   0.900 0.368174    
+## factor(street)263       0.1233063  0.1251872   0.985 0.324797    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3233 on 1480 degrees of freedom
+## Multiple R-squared:  0.4421, Adjusted R-squared:  0.3743 
+## F-statistic: 6.516 on 180 and 1480 DF,  p-value: &lt; 2.2e-16</code></pre>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Recall that the authors described their experiment as “stratified at the street level,” which is a synonym for blocking by street. Explain why the confidence interval with fixed effects does not differ much from the previous one.</li>
+</ol>
+<p><strong>Our previous model, which included measuring the effect of providing a recycling bin and the pre-treatment value of Y as a covariate, resulted in a statistically significant coefficent of .12711 and an SE of .01722. Our model stratified at the street level resulted in a statistically signficant coefficent for the treatment of .1160641 and an SE of .0176099. The previous model’s 95% confidence interval was between .0933588 and .160861 with a distance of .0675024 and this model, with street effects, is:</strong></p>
+<p><span class="math inline">\(.1160641 \pm 1.96 * .0176099\)</span> <strong>Between .0815487 amd .15058 with a distance of .0690308. I believe that the confidence interval doesn’t differ much from the previous model because not much information is being added when we add the blocking by street protocol. In effect, our model is not getting more precies thereby reducing our standard errors yielding a smaller confidence interval.</strong></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Perhaps having a cell phone helps explain the level of recycling behavior. Instead of “has cell phone,” we find it easier to interpret the coefficient if we define the variable &quot; no cell phone.&quot; Give the R command to define this new variable, which equals one minus the “has cell phone” variable in the authors’ data set. Use “no cell phone” instead of “has cell phone” in subsequent regressions with this dataset.</li>
+</ol>
+<pre class="r"><code>output &lt;- 1-dt$havecell
+head(output)</code></pre>
+<pre><code>## [1] 0 0 0 0 0 1</code></pre>
+<pre class="r"><code>head(dt$havecell)</code></pre>
+<pre><code>## [1] 1 1 1 1 1 0</code></pre>
+<pre class="r"><code>dt$nocell &lt;- output
+dt</code></pre>
+<pre><code>##       street havecell avg_bins_treat base_avg_bins_treat bin sms bin_s
+##    1:      7        1      1.0416666               0.750   1   1     1
+##    2:      7        1      0.0000000               0.000   0   1     0
+##    3:      7        1      0.7500000               0.500   0   0     0
+##    4:      7        1      0.5416667               0.500   0   0     0
+##    5:      6        1      0.9583333               0.375   1   0     0
+##   ---                                                                 
+## 1657:    258        0      0.7500000               1.000   0   0     0
+## 1658:    258        1      0.6666667               0.000   0   1     0
+## 1659:    258        1      0.8750000               0.125   0   1     0
+## 1660:    258        0      0.8333333               1.000   1   0     1
+## 1661:    258        0      0.6666667               0.375   0   0     0
+##       bin_g sms_p sms_g nocell
+##    1:     0     0     1      0
+##    2:     0     1     0      0
+##    3:     0     0     0      0
+##    4:     0     0     0      0
+##    5:     1     0     0      0
+##   ---                         
+## 1657:     0     0     0      1
+## 1658:     0     0     1      0
+## 1659:     0     1     0      0
+## 1660:     0     0     0      1
+## 1661:     0     0     0      1</code></pre>
+<pre class="r"><code>head(dt$nocell)</code></pre>
+<pre><code>## [1] 0 0 0 0 0 1</code></pre>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Now add “no cell phone” as a covariate to the previous regression. Provide a 95% confidence interval for the treatment effect. Explain why this confidence interval does not differ much from the previous one.</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + dt$nocell + factor(street), data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + 
+##     dt$nocell + factor(street), data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.44271 -0.19428 -0.01711  0.16030  1.84323 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)             0.2876250  0.0978741   2.939 0.003347 ** 
+## dt$bin                  0.1171694  0.0175861   6.663 3.78e-11 ***
+## dt$base_avg_bins_treat  0.3668400  0.0147461  24.877  &lt; 2e-16 ***
+## dt$nocell              -0.0429672  0.0175619  -2.447 0.014536 *  
+## factor(street)3         0.0473170  0.1410830   0.335 0.737383    
+## factor(street)4        -0.0292088  0.1451975  -0.201 0.840596    
+## factor(street)5        -0.0009820  0.1451020  -0.007 0.994601    
+## factor(street)6         0.0430615  0.1500623   0.287 0.774185    
+## factor(street)7         0.0272138  0.1741994   0.156 0.875879    
+## factor(street)8         0.0444826  0.1300751   0.342 0.732417    
+## factor(street)9         0.0108438  0.1347546   0.080 0.935874    
+## factor(street)10        0.0697463  0.1223235   0.570 0.568643    
+## factor(street)11        0.0262337  0.1349941   0.194 0.845943    
+## factor(street)15        0.0726314  0.1886699   0.385 0.700318    
+## factor(street)17        0.1375254  0.1638485   0.839 0.401412    
+## factor(street)20       -0.1279096  0.1502520  -0.851 0.394740    
+## factor(street)21        0.0415966  0.1641703   0.253 0.800014    
+## factor(street)22       -0.0176789  0.1155863  -0.153 0.878459    
+## factor(street)23       -0.0540752  0.1176601  -0.460 0.645879    
+## factor(street)26        0.0865194  0.2104650   0.411 0.681068    
+## factor(street)32        0.2669652  0.2104820   1.268 0.204872    
+## factor(street)37        0.2553027  0.1742758   1.465 0.143151    
+## factor(street)38        0.0190313  0.1741396   0.109 0.912989    
+## factor(street)40        0.0359328  0.2104304   0.171 0.864437    
+## factor(street)41        0.1228156  0.1742599   0.705 0.481056    
+## factor(street)42       -0.0227996  0.2108171  -0.108 0.913892    
+## factor(street)43        0.1448257  0.1741330   0.832 0.405715    
+## factor(street)44        0.2172290  0.1501302   1.447 0.148126    
+## factor(street)45        0.0541653  0.1884842   0.287 0.773867    
+## factor(street)46        0.1026413  0.1639106   0.626 0.531278    
+## factor(street)47        0.5174350  0.1888403   2.740 0.006217 ** 
+## factor(street)53        0.1204108  0.2103376   0.572 0.567095    
+## factor(street)58        0.0693009  0.1322832   0.524 0.600438    
+## factor(street)60        0.1269351  0.1264494   1.004 0.315619    
+## factor(street)61        0.0871902  0.2106536   0.414 0.679005    
+## factor(street)62        0.1406195  0.1561821   0.900 0.368077    
+## factor(street)63        0.0699528  0.1500131   0.466 0.641061    
+## factor(street)64        0.1421589  0.1638695   0.868 0.385802    
+## factor(street)66        0.0486430  0.1561965   0.311 0.755524    
+## factor(street)67        0.0957189  0.1452293   0.659 0.509942    
+## factor(street)68        0.1832636  0.1501320   1.221 0.222401    
+## factor(street)69        0.1686643  0.1377487   1.224 0.220983    
+## factor(street)70        0.0804385  0.1300919   0.618 0.536459    
+## factor(street)72        0.0581678  0.1378181   0.422 0.673041    
+## factor(street)73       -0.0772537  0.1500655  -0.515 0.606770    
+## factor(street)74        0.0280909  0.1211786   0.232 0.816715    
+## factor(street)75        0.0511721  0.1348826   0.379 0.704458    
+## factor(street)77        0.0611698  0.1561638   0.392 0.695334    
+## factor(street)78        0.0416203  0.1264378   0.329 0.742069    
+## factor(street)79        0.4223495  0.1887215   2.238 0.025373 *  
+## factor(street)80        0.1127090  0.1155049   0.976 0.329326    
+## factor(street)81        0.0710531  0.1885893   0.377 0.706405    
+## factor(street)82        0.1290389  0.2103730   0.613 0.539718    
+## factor(street)83       -0.0203079  0.1564437  -0.130 0.896735    
+## factor(street)84        0.0958025  0.1562674   0.613 0.539926    
+## factor(street)85        0.1666365  0.1264694   1.318 0.187841    
+## factor(street)86        0.0290504  0.1224034   0.237 0.812431    
+## factor(street)88        0.0003815  0.1411286   0.003 0.997844    
+## factor(street)89        0.0884200  0.1500615   0.589 0.555800    
+## factor(street)91       -0.1295170  0.2103351  -0.616 0.538144    
+## factor(street)93        0.0312294  0.1561181   0.200 0.841479    
+## factor(street)94        0.0492609  0.1451620   0.339 0.734393    
+## factor(street)96        0.0621879  0.1561215   0.398 0.690444    
+## factor(street)98        0.1423894  0.1348878   1.056 0.291317    
+## factor(street)99        0.3333284  0.1453050   2.294 0.021931 *  
+## factor(street)100       0.1740860  0.1413143   1.232 0.218180    
+## factor(street)101       0.3110685  0.1453525   2.140 0.032510 *  
+## factor(street)102       0.0506541  0.2118178   0.239 0.811030    
+## factor(street)103       0.1872478  0.1451332   1.290 0.197190    
+## factor(street)105       0.2183671  0.1742314   1.253 0.210289    
+## factor(street)106       0.4916118  0.1348038   3.647 0.000275 ***
+## factor(street)107       0.1485830  0.1885585   0.788 0.430826    
+## factor(street)109       0.0807446  0.1500390   0.538 0.590549    
+## factor(street)110       0.2245482  0.1742125   1.289 0.197623    
+## factor(street)111       0.0861889  0.1742618   0.495 0.620960    
+## factor(street)112       0.2885674  0.1503465   1.919 0.055132 .  
+## factor(street)113       0.1654387  0.1564169   1.058 0.290375    
+## factor(street)115       0.3816887  0.1349054   2.829 0.004728 ** 
+## factor(street)117       0.6807328  0.2119636   3.212 0.001349 ** 
+## factor(street)118       0.1176185  0.2103597   0.559 0.576157    
+## factor(street)119       0.0842458  0.1500621   0.561 0.574606    
+## factor(street)120       0.0232633  0.1501161   0.155 0.876867    
+## factor(street)121       0.2759211  0.1502491   1.836 0.066496 .  
+## factor(street)122      -0.0646606  0.1885460  -0.343 0.731690    
+## factor(street)124       0.1266702  0.1376998   0.920 0.357774    
+## factor(street)125       0.4014512  0.1270225   3.160 0.001607 ** 
+## factor(street)126      -0.0158853  0.1643710  -0.097 0.923023    
+## factor(street)127       0.1762915  0.1643050   1.073 0.283467    
+## factor(street)128       0.2512148  0.1348946   1.862 0.062758 .  
+## factor(street)129       0.4761889  0.2104819   2.262 0.023819 *  
+## factor(street)130       0.2776131  0.1501427   1.849 0.064658 .  
+## factor(street)131       0.3741923  0.1505384   2.486 0.013040 *  
+## factor(street)132       0.3357778  0.1284528   2.614 0.009039 ** 
+## factor(street)133       0.4209772  0.1885869   2.232 0.025746 *  
+## factor(street)134       0.0934959  0.1562717   0.598 0.549737    
+## factor(street)136       0.2682935  0.1503800   1.784 0.074612 .  
+## factor(street)137       0.3541631  0.2103075   1.684 0.092388 .  
+## factor(street)138       0.2119487  0.1382845   1.533 0.125564    
+## factor(street)147       0.2901211  0.2103950   1.379 0.168123    
+## factor(street)148       0.2009915  0.1884986   1.066 0.286473    
+## factor(street)149       0.3774627  0.1454622   2.595 0.009555 ** 
+## factor(street)151      -0.1611941  0.2105575  -0.766 0.444061    
+## factor(street)152       0.2365772  0.2103760   1.125 0.260964    
+## factor(street)153       0.0865194  0.2104650   0.411 0.681068    
+## factor(street)154       0.0452158  0.1411229   0.320 0.748710    
+## factor(street)155      -0.1601593  0.2103597  -0.761 0.446564    
+## factor(street)156       0.3074178  0.2103729   1.461 0.144146    
+## factor(street)157       0.2500940  0.1887320   1.325 0.185334    
+## factor(street)158       0.4888961  0.1742118   2.806 0.005077 ** 
+## factor(street)160      -0.0191333  0.1376912  -0.139 0.889502    
+## factor(street)163       0.0036677  0.1562416   0.023 0.981275    
+## factor(street)164       0.0111749  0.1742242   0.064 0.948867    
+## factor(street)165       0.1115361  0.1887126   0.591 0.554586    
+## factor(street)166      -0.0342922  0.2104182  -0.163 0.870563    
+## factor(street)168       0.2598748  0.2107484   1.233 0.217733    
+## factor(street)170       0.0977005  0.1282709   0.762 0.446376    
+## factor(street)171       0.0657222  0.1640097   0.401 0.688683    
+## factor(street)172       0.0911515  0.1502817   0.607 0.544251    
+## factor(street)175       0.3607661  0.1324011   2.725 0.006510 ** 
+## factor(street)179       0.0890336  0.1887069   0.472 0.637133    
+## factor(street)180       0.0079402  0.1202942   0.066 0.947382    
+## factor(street)182      -0.0477894  0.1638452  -0.292 0.770576    
+## factor(street)183       0.0284945  0.1214214   0.235 0.814494    
+## factor(street)185       0.0426141  0.1638849   0.260 0.794881    
+## factor(street)186       0.0998437  0.1501425   0.665 0.506159    
+## factor(street)187       0.0998979  0.1302335   0.767 0.443164    
+## factor(street)188       0.0699183  0.1451328   0.482 0.630052    
+## factor(street)189       0.0491278  0.1202272   0.409 0.682874    
+## factor(street)190       0.1199941  0.1503536   0.798 0.424952    
+## factor(street)191       0.0824959  0.1451036   0.569 0.569761    
+## factor(street)192      -0.0015741  0.1161731  -0.014 0.989191    
+## factor(street)193       0.1786460  0.1502936   1.189 0.234769    
+## factor(street)196      -0.1349570  0.1639411  -0.823 0.410525    
+## factor(street)197       0.1564930  0.2103889   0.744 0.457099    
+## factor(street)198       0.1917096  0.1283153   1.494 0.135376    
+## factor(street)200       0.0633054  0.1562644   0.405 0.685450    
+## factor(street)202       0.1281242  0.1745627   0.734 0.463082    
+## factor(street)203      -0.1359179  0.1561098  -0.871 0.384083    
+## factor(street)206      -0.1361967  0.1411379  -0.965 0.334707    
+## factor(street)207      -0.1330096  0.1885262  -0.706 0.480596    
+## factor(street)208      -0.0024732  0.1413179  -0.018 0.986039    
+## factor(street)209      -0.2118752  0.1323008  -1.601 0.109487    
+## factor(street)210      -0.1085927  0.1415953  -0.767 0.443250    
+## factor(street)213       0.1538054  0.1350413   1.139 0.254908    
+## factor(street)215       0.0478623  0.1134281   0.422 0.673115    
+## factor(street)216      -0.3460032  0.1756588  -1.970 0.049054 *  
+## factor(street)217      -0.0853715  0.1500179  -0.569 0.569392    
+## factor(street)220      -0.0972529  0.1561686  -0.623 0.533550    
+## factor(street)221      -0.0566223  0.1451466  -0.390 0.696516    
+## factor(street)222      -0.0575921  0.1743681  -0.330 0.741227    
+## factor(street)223      -0.0732497  0.1501342  -0.488 0.625696    
+## factor(street)225       0.0120225  0.1453215   0.083 0.934077    
+## factor(street)227       0.0464577  0.1741802   0.267 0.789721    
+## factor(street)228       0.1459020  0.2102685   0.694 0.487864    
+## factor(street)229       0.1536155  0.1647545   0.932 0.351287    
+## factor(street)230       0.1125807  0.1561651   0.721 0.471080    
+## factor(street)232       0.1823045  0.1887363   0.966 0.334241    
+## factor(street)233       0.1493562  0.1347551   1.108 0.267890    
+## factor(street)235      -0.0225920  0.1742210  -0.130 0.896842    
+## factor(street)236       0.0984495  0.1237389   0.796 0.426379    
+## factor(street)238      -0.0024832  0.1452086  -0.017 0.986359    
+## factor(street)240      -0.2050651  0.1741188  -1.178 0.239093    
+## factor(street)241      -0.0105654  0.1885214  -0.056 0.955315    
+## factor(street)242       0.1518478  0.2103808   0.722 0.470546    
+## factor(street)243       0.2400200  0.1887327   1.272 0.203663    
+## factor(street)244       0.2040852  0.1302938   1.566 0.117481    
+## factor(street)246      -0.0260976  0.1641261  -0.159 0.873683    
+## factor(street)247       0.0978503  0.1322925   0.740 0.459629    
+## factor(street)248       0.1006470  0.1168971   0.861 0.389384    
+## factor(street)249       0.1954384  0.1265802   1.544 0.122805    
+## factor(street)250       0.1527487  0.1117499   1.367 0.171871    
+## factor(street)253       0.2200733  0.1250871   1.759 0.078723 .  
+## factor(street)254       0.2102890  0.1563535   1.345 0.178845    
+## factor(street)255       0.1363813  0.1283622   1.062 0.288195    
+## factor(street)256       0.1367071  0.1131917   1.208 0.227337    
+## factor(street)257       0.0010780  0.1237155   0.009 0.993049    
+## factor(street)258       0.1952463  0.1201883   1.625 0.104482    
+## factor(street)259       0.8284665  0.2108060   3.930 8.89e-05 ***
+## factor(street)260       0.0667213  0.1124432   0.593 0.553019    
+## factor(street)261       0.0658849  0.1502541   0.438 0.661095    
+## factor(street)262       0.1476228  0.1452989   1.016 0.309798    
+## factor(street)263       0.1318166  0.1250252   1.054 0.291909    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3228 on 1479 degrees of freedom
+## Multiple R-squared:  0.4444, Adjusted R-squared:  0.3764 
+## F-statistic: 6.535 on 181 and 1479 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p><strong>Our previous, model stratified at the street level resulted in a statistically signficant coefficent for the treatment of .1160641 and an SE of .0176099. This yields a 95% confidence interval of between .0815487 amd .15058 with a distance of .0690308</strong></p>
+<p><strong>Our current model with the nocell covariate yields a statistically signficant treatment coefficent of .1171694 and an SE of .0175861</strong></p>
+<p><span class="math inline">\(.1171694 \pm 1.96 * .0175861\)</span></p>
+<p><strong>Yielding a 95% confidence interval of between .0827006 and .151638 with a distance of .0689375, which is a hare smaller of an interval than from the previous model.</strong></p>
+<p><strong>Again, I believe that the confidence interval doesn’t differ much from the previous model because not much information is being added when we adding the no-cell covariate. In effect, our model is not getting more precise because much of the explanatory power of the coefficents is not broken out by the nocell covariate.</strong></p>
+<ol start="7" style="list-style-type: lower-alpha">
+<li>Now let’s add in the SMS treatment. Re-run the previous regression with “any SMS” included. You should get the same results as in Table 4A. Provide a 95% confidence interval for the treatment effect of the recycling bin. Explain why this confidence interval does not differ much from the previous one.</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + dt$nocell + dt$sms + factor(street), data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$avg_bins_treat ~ dt$bin + dt$base_avg_bins_treat + 
+##     dt$nocell + dt$sms + factor(street), data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.43649 -0.19442 -0.01749  0.16096  1.85315 
+## 
+## Coefficients:
+##                         Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)             0.278621   0.098526   2.828 0.004749 ** 
+## dt$bin                  0.116968   0.017590   6.650 4.12e-11 ***
+## dt$base_avg_bins_treat  0.367082   0.014751  24.885  &lt; 2e-16 ***
+## dt$nocell              -0.033425   0.021205  -1.576 0.115174    
+## dt$sms                  0.017400   0.021666   0.803 0.422039    
+## factor(street)3         0.045630   0.141116   0.323 0.746475    
+## factor(street)4        -0.031352   0.145239  -0.216 0.829123    
+## factor(street)5        -0.001938   0.145124  -0.013 0.989346    
+## factor(street)6         0.040918   0.150104   0.273 0.785200    
+## factor(street)7         0.025733   0.174230   0.148 0.882603    
+## factor(street)8         0.043776   0.130094   0.336 0.736546    
+## factor(street)9         0.010774   0.134771   0.080 0.936295    
+## factor(street)10        0.067395   0.122373   0.551 0.581902    
+## factor(street)11        0.023957   0.135040   0.177 0.859212    
+## factor(street)15        0.074900   0.188714   0.397 0.691501    
+## factor(street)17        0.137455   0.163868   0.839 0.401711    
+## factor(street)20       -0.130408   0.150302  -0.868 0.385733    
+## factor(street)21        0.039734   0.164206   0.242 0.808834    
+## factor(street)22       -0.018595   0.115606  -0.161 0.872237    
+## factor(street)23       -0.055055   0.117681  -0.468 0.639975    
+## factor(street)26        0.083197   0.210531   0.395 0.692767    
+## factor(street)32        0.263791   0.210544   1.253 0.210440    
+## factor(street)37        0.253842   0.174306   1.456 0.145522    
+## factor(street)38        0.015671   0.174211   0.090 0.928338    
+## factor(street)40        0.035879   0.210456   0.170 0.864655    
+## factor(street)41        0.122501   0.174281   0.703 0.482232    
+## factor(street)42       -0.023244   0.210843  -0.110 0.912233    
+## factor(street)43        0.144891   0.174154   0.832 0.405561    
+## factor(street)44        0.215315   0.150167   1.434 0.151831    
+## factor(street)45        0.052028   0.188526   0.276 0.782607    
+## factor(street)46        0.101187   0.163940   0.617 0.537186    
+## factor(street)47        0.519494   0.188880   2.750 0.006025 ** 
+## factor(street)53        0.117700   0.210390   0.559 0.575947    
+## factor(street)58        0.066526   0.132344   0.503 0.615270    
+## factor(street)60        0.125768   0.126473   0.994 0.320177    
+## factor(street)61        0.087254   0.210679   0.414 0.678821    
+## factor(street)62        0.142097   0.156212   0.910 0.363158    
+## factor(street)63        0.066623   0.150088   0.444 0.657186    
+## factor(street)64        0.143663   0.163900   0.877 0.380884    
+## factor(street)66        0.047088   0.156227   0.301 0.763148    
+## factor(street)67        0.095408   0.145247   0.657 0.511367    
+## factor(street)68        0.181849   0.150160   1.211 0.226076    
+## factor(street)69        0.167978   0.137768   1.219 0.222933    
+## factor(street)70        0.078072   0.130141   0.600 0.548661    
+## factor(street)72        0.056319   0.137854   0.409 0.682938    
+## factor(street)73       -0.079401   0.150107  -0.529 0.596912    
+## factor(street)74        0.027693   0.121194   0.229 0.819287    
+## factor(street)75        0.048743   0.134933   0.361 0.717975    
+## factor(street)77        0.059967   0.156190   0.384 0.701080    
+## factor(street)78        0.040564   0.126460   0.321 0.748431    
+## factor(street)79        0.424124   0.188757   2.247 0.024792 *  
+## factor(street)80        0.112564   0.115519   0.974 0.330008    
+## factor(street)81        0.066611   0.188693   0.353 0.724129    
+## factor(street)82        0.134855   0.210523   0.641 0.521899    
+## factor(street)83       -0.022777   0.156493  -0.146 0.884298    
+## factor(street)84        0.095429   0.156287   0.611 0.541559    
+## factor(street)85        0.165956   0.126488   1.312 0.189712    
+## factor(street)86        0.027169   0.122440   0.222 0.824429    
+## factor(street)88       -0.002325   0.141186  -0.016 0.986862    
+## factor(street)89        0.086341   0.150102   0.575 0.565233    
+## factor(street)91       -0.126327   0.210398  -0.600 0.548320    
+## factor(street)93        0.031085   0.156137   0.199 0.842224    
+## factor(street)94        0.045593   0.145251   0.314 0.753647    
+## factor(street)96        0.062052   0.156140   0.397 0.691122    
+## factor(street)98        0.146857   0.135019   1.088 0.276914    
+## factor(street)99        0.334188   0.145326   2.300 0.021612 *  
+## factor(street)100       0.173056   0.141337   1.224 0.220990    
+## factor(street)101       0.313563   0.145403   2.157 0.031205 *  
+## factor(street)102       0.049690   0.211847   0.235 0.814586    
+## factor(street)103       0.186174   0.145157   1.283 0.199844    
+## factor(street)105       0.216451   0.174269   1.242 0.214414    
+## factor(street)106       0.494546   0.134870   3.667 0.000254 ***
+## factor(street)107       0.153114   0.188666   0.812 0.417175    
+## factor(street)109       0.085043   0.150152   0.566 0.571222    
+## factor(street)110       0.229977   0.174365   1.319 0.187391    
+## factor(street)111       0.088102   0.174299   0.505 0.613309    
+## factor(street)112       0.291574   0.150411   1.939 0.052751 .  
+## factor(street)113       0.169408   0.156514   1.082 0.279259    
+## factor(street)115       0.382464   0.134925   2.835 0.004650 ** 
+## factor(street)117       0.682889   0.212006   3.221 0.001305 ** 
+## factor(street)118       0.120688   0.210420   0.574 0.566353    
+## factor(street)119       0.088568   0.150177   0.590 0.555441    
+## factor(street)120       0.028717   0.150288   0.191 0.848490    
+## factor(street)121       0.280143   0.150359   1.863 0.062638 .  
+## factor(street)122      -0.062553   0.188587  -0.332 0.740167    
+## factor(street)124       0.131563   0.137851   0.954 0.340045    
+## factor(street)125       0.402858   0.127050   3.171 0.001551 ** 
+## factor(street)126      -0.010003   0.164554  -0.061 0.951536    
+## factor(street)127       0.178950   0.164358   1.089 0.276429    
+## factor(street)128       0.252433   0.134919   1.871 0.061544 .  
+## factor(street)129       0.476105   0.210507   2.262 0.023861 *  
+## factor(street)130       0.280709   0.150210   1.869 0.061852 .  
+## factor(street)131       0.378408   0.150648   2.512 0.012115 *  
+## factor(street)132       0.339074   0.128534   2.638 0.008427 ** 
+## factor(street)133       0.425130   0.188680   2.253 0.024394 *  
+## factor(street)134       0.093284   0.156291   0.597 0.550693    
+## factor(street)136       0.268361   0.150398   1.784 0.074574 .  
+## factor(street)137       0.354052   0.210333   1.683 0.092529 .  
+## factor(street)138       0.216737   0.138430   1.566 0.117637    
+## factor(street)147       0.295897   0.210543   1.405 0.160112    
+## factor(street)148       0.207486   0.188695   1.100 0.271690    
+## factor(street)149       0.382246   0.145601   2.625 0.008747 ** 
+## factor(street)151      -0.161416   0.210583  -0.767 0.443490    
+## factor(street)152       0.239136   0.210425   1.136 0.255957    
+## factor(street)153       0.083197   0.210531   0.395 0.692767    
+## factor(street)154       0.044158   0.141146   0.313 0.754435    
+## factor(street)155      -0.162890   0.210412  -0.774 0.438969    
+## factor(street)156       0.304186   0.210437   1.446 0.148529    
+## factor(street)157       0.250053   0.188755   1.325 0.185459    
+## factor(street)158       0.489007   0.174233   2.807 0.005072 ** 
+## factor(street)160      -0.019276   0.137708  -0.140 0.888695    
+## factor(street)163       0.005209   0.156272   0.033 0.973416    
+## factor(street)164       0.007417   0.174308   0.043 0.966065    
+## factor(street)165       0.111472   0.188735   0.591 0.554862    
+## factor(street)166      -0.037584   0.210483  -0.179 0.858307    
+## factor(street)168       0.262598   0.210801   1.246 0.213066    
+## factor(street)170       0.095140   0.128326   0.741 0.458574    
+## factor(street)171       0.065351   0.164030   0.398 0.690388    
+## factor(street)172       0.090711   0.150301   0.604 0.546251    
+## factor(street)175       0.359790   0.132423   2.717 0.006665 ** 
+## factor(street)179       0.084846   0.188802   0.449 0.653213    
+## factor(street)180       0.007279   0.120312   0.061 0.951763    
+## factor(street)182      -0.050769   0.163907  -0.310 0.756801    
+## factor(street)183       0.026863   0.121453   0.221 0.824982    
+## factor(street)185       0.040968   0.163917   0.250 0.802675    
+## factor(street)186       0.099778   0.150161   0.664 0.506488    
+## factor(street)187       0.098993   0.130254   0.760 0.447376    
+## factor(street)188       0.069827   0.145150   0.481 0.630538    
+## factor(street)189       0.048500   0.120244   0.403 0.686753    
+## factor(street)190       0.118684   0.150381   0.789 0.430106    
+## factor(street)191       0.082413   0.145121   0.568 0.570196    
+## factor(street)192      -0.002415   0.116192  -0.021 0.983419    
+## factor(street)193       0.178198   0.150313   1.186 0.236005    
+## factor(street)196      -0.133498   0.163971  -0.814 0.415687    
+## factor(street)197       0.153742   0.210442   0.731 0.465158    
+## factor(street)198       0.190819   0.128335   1.487 0.137260    
+## factor(street)200       0.064318   0.156288   0.412 0.680741    
+## factor(street)202       0.125789   0.174608   0.720 0.471388    
+## factor(street)203      -0.133359   0.156161  -0.854 0.393251    
+## factor(street)206      -0.138085   0.141174  -0.978 0.328175    
+## factor(street)207      -0.133182   0.188549  -0.706 0.480080    
+## factor(street)208      -0.003744   0.141344  -0.026 0.978868    
+## factor(street)209      -0.213967   0.132342  -1.617 0.106142    
+## factor(street)210      -0.109168   0.141614  -0.771 0.440900    
+## factor(street)213       0.152054   0.135075   1.126 0.260474    
+## factor(street)215       0.046192   0.113461   0.407 0.683979    
+## factor(street)216      -0.344723   0.175687  -1.962 0.049933 *  
+## factor(street)217      -0.087556   0.150061  -0.583 0.559663    
+## factor(street)220      -0.098766   0.156199  -0.632 0.527280    
+## factor(street)221      -0.059530   0.145209  -0.410 0.681895    
+## factor(street)222      -0.056284   0.174397  -0.323 0.746940    
+## factor(street)223      -0.073499   0.150152  -0.489 0.624563    
+## factor(street)225       0.009002   0.145388   0.062 0.950638    
+## factor(street)227       0.046474   0.174201   0.267 0.789672    
+## factor(street)228       0.140092   0.210418   0.666 0.505658    
+## factor(street)229       0.153125   0.164775   0.929 0.352888    
+## factor(street)230       0.112420   0.156184   0.720 0.471766    
+## factor(street)232       0.177800   0.188842   0.942 0.346590    
+## factor(street)233       0.147871   0.134784   1.097 0.272779    
+## factor(street)235      -0.022412   0.174242  -0.129 0.897670    
+## factor(street)236       0.098101   0.123755   0.793 0.428077    
+## factor(street)238      -0.002668   0.145226  -0.018 0.985343    
+## factor(street)240      -0.208509   0.174192  -1.197 0.231498    
+## factor(street)241      -0.012682   0.188562  -0.067 0.946385    
+## factor(street)242       0.148596   0.210445   0.706 0.480234    
+## factor(street)243       0.244681   0.188845   1.296 0.195289    
+## factor(street)244       0.203724   0.130310   1.563 0.118178    
+## factor(street)246      -0.026382   0.164146  -0.161 0.872335    
+## factor(street)247       0.096377   0.132321   0.728 0.466510    
+## factor(street)248       0.100398   0.116912   0.859 0.390616    
+## factor(street)249       0.193499   0.126618   1.528 0.126674    
+## factor(street)250       0.151499   0.111774   1.355 0.175497    
+## factor(street)253       0.219748   0.125103   1.757 0.079204 .  
+## factor(street)254       0.211245   0.156377   1.351 0.176943    
+## factor(street)255       0.136124   0.128378   1.060 0.289163    
+## factor(street)256       0.136034   0.113208   1.202 0.229700    
+## factor(street)257      -0.000128   0.123740  -0.001 0.999175    
+## factor(street)258       0.195587   0.120204   1.627 0.103922    
+## factor(street)259       0.827851   0.210833   3.927 9.01e-05 ***
+## factor(street)260       0.066609   0.112457   0.592 0.553734    
+## factor(street)261       0.064542   0.150281   0.429 0.667639    
+## factor(street)262       0.148257   0.145318   1.020 0.307790    
+## factor(street)263       0.131076   0.125044   1.048 0.294698    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3228 on 1478 degrees of freedom
+## Multiple R-squared:  0.4446, Adjusted R-squared:  0.3762 
+## F-statistic: 6.501 on 182 and 1478 DF,  p-value: &lt; 2.2e-16</code></pre>
+<ol start="8" style="list-style-type: lower-alpha">
+<li>Now reproduce the results of column 2 in Table 4B, estimating separate treatment effects for the two types of SMS treatments and the two types of recycling-bin treatments. Provide a 95% confidence interval for the effect of the unadorned recycling bin. Explain how your answer differs from that in part (g), and explain why you think it differs.</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$avg_bins_treat ~ dt$sms_g + dt$sms_p + dt$bin_g + dt$bin_s, data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$avg_bins_treat ~ dt$sms_g + dt$sms_p + dt$bin_g + 
+##     dt$bin_s, data = dt)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.7773 -0.2565 -0.0482  0.1889  3.5280 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  0.638619   0.013932  45.837  &lt; 2e-16 ***
+## dt$sms_g    -0.007077   0.028073  -0.252    0.801    
+## dt$sms_p    -0.015571   0.027894  -0.558    0.577    
+## dt$bin_g     0.130793   0.026975   4.849 1.36e-06 ***
+## dt$bin_s     0.138652   0.026786   5.176 2.54e-07 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.4042 on 1656 degrees of freedom
+## Multiple R-squared:  0.02474,    Adjusted R-squared:  0.02239 
+## F-statistic:  10.5 on 4 and 1656 DF,  p-value: 2.103e-08</code></pre>
+<p><strong>We obtain a 95% confidence level by taking the sum of the coefficent being examined plus/minus 1.96 times the Standard Error. Because the unadorned recycling bin’s Coefficent is .130793 and its SE is .026975:</strong></p>
+<p><span class="math inline">\(.130793 \pm 1.96 * .026975\)</span></p>
+<p><strong>Our 95% confidence interval is between 0.077922 and 0.183664, a distance of .105742. I believe this model differes because we are breaking out the discerete treatments by their type (generic versus personal SMS, bin sticker versus bin no-sticker), which together yield more context and specific data regarding different outcomes. Consequently this estimate will have a higher accuracy than the other model. </strong></p>
 </div>
 <div id="a-final-practice-problem" class="section level1">
 <h1>5 A Final Practice Problem</h1>
@@ -315,18 +1300,146 @@ head(d)</code></pre>
 ## 4              1    0
 ## 5              1    0
 ## 6              1    1</code></pre>
+<pre class="r"><code>dt &lt;- data.table(d)
+dt[,.N,]</code></pre>
+<pre><code>## [1] 100</code></pre>
+<p><strong>OK, we have 100 observations</strong></p>
 <p>You are asked to analyze it. Patients’ temperature and whether they are vomiting is recorded on day 0 of the experiment, then ZMapp is administered to patients in the treatment group on day 1. Vomiting and temperature is again recorded on day 14.</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>Without using any covariates, answer this question with regression: What is the estimated effect of ZMapp (with standard error in parentheses) on whether someone was vomiting on day 14? What is the p-value associated with this estimate?</p></li>
-<li><p>Add covariates for vomiting on day 0 and patient temperature on day 0 to the regression from part (a) and report the ATE (with standard error). Also report the p-value.</p></li>
-<li><p>Do you prefer the estimate of the ATE reported in part (a) or part (b)? Why?</p></li>
-<li><p>The regression from part (b) suggests that temperature is highly predictive of vomiting. Also include temperature on day 14 as a covariate in the regression from part (b) and report the ATE, the standard error, and the p-value.</p></li>
-<li><p>Do you prefer the estimate of the ATE reported in part (b) or part (d)? Why?</p></li>
-<li><p>Now let’s switch from the outcome of vomiting to the outcome of temperature, and use the same regression covariates as in part (b). Test the hypothesis that ZMapp is especially likely to reduce men’s temperatures, as compared to women’s, and describe how you did so. What do the results suggest?</p></li>
-<li><p>Suppose that you had not run the regression in part (f). Instead, you speak with a colleague to learn about heterogenous treatment effects. This colleague has access to a non-anonymized version of the same dataset and reports that he had looked at heterogenous effects of the ZMapp treatment by each of 10,000 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 2,000 different indicators of health, for 20,000,000 different regressions in total. Across these 20,000,000 regressions your colleague ran, the treatment’s interaction with gender on the outcome of temperature is the only heterogenous treatment effect that he found to be statistically significant. He reasons that this shows the importance of gender for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering his confidence, after looking at the data, he also returned to his medical textbooks and built a theory about why ZMapp interacts with processes only present in men to cure. Another doctor, unfamiliar with the data, hears his theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)</p></li>
-<li><p>Now, imagine that what described in part (g) did not happen, but that you had tested this heterogeneous treatment effect, and only this heterogeneous treatment effect, of your own accord. Would you be more or less inclined to believe that the heterogeneous treatment effect really exists? Why?</p></li>
-<li><p>Another colleague proposes that being of African descent causes one to be more likely to get Ebola. He asks you what ideal experiment would answer this question. What would you tell him? (<em>Hint: refer to Chapter 1 of Mostly Harmless Econometrics.</em>)</p></li>
+<li>Without using any covariates, answer this question with regression: What is the estimated effect of ZMapp (with standard error in parentheses) on whether someone was vomiting on day 14? What is the p-value associated with this estimate?</li>
 </ol>
+<pre class="r"><code>fit &lt;- lm(dt$vomiting_day14 ~ dt$treat_zmapp , data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$vomiting_day14 ~ dt$treat_zmapp, data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.84746 -0.03803  0.15254  0.21197  0.39024 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     0.84746    0.05483  15.456   &lt;2e-16 ***
+## dt$treat_zmapp -0.23770    0.08563  -2.776   0.0066 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.4212 on 98 degrees of freedom
+## Multiple R-squared:  0.0729, Adjusted R-squared:  0.06343 
+## F-statistic: 7.705 on 1 and 98 DF,  p-value: 0.006595</code></pre>
+<p><strong>The estimated treatment effect of ZMapp on whether someone was vomiting on day 14 was -0.23770 (SE is .08563). The P-value associated with this esimate is .0066, which is significant at the 1% level. </strong></p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Add covariates for vomiting on day 0 and patient temperature on day 0 to the regression from part (a) and report the ATE (with standard error). Also report the p-value.</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$vomiting_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + dt$temperature_day0, data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$vomiting_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + 
+##     dt$temperature_day0, data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.79643 -0.18106  0.04654  0.23122  0.68413 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept)         -19.46966    7.44095  -2.617  0.01032 * 
+## dt$treat_zmapp       -0.16554    0.07567  -2.188  0.03113 * 
+## dt$vomiting_day0      0.06456    0.14635   0.441  0.66013   
+## dt$temperature_day0   0.20555    0.07634   2.693  0.00837 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3668 on 96 degrees of freedom
+## Multiple R-squared:  0.311,  Adjusted R-squared:  0.2895 
+## F-statistic: 14.45 on 3 and 96 DF,  p-value: 7.684e-08</code></pre>
+<p><strong>The estimated treatment effect of ZMapp on whether someone was vomiting on day 14 with this expanded model was -0.16554 (SE is .07567). The P-value associated with this esimate is .03113, which is significant at the 5% level. </strong></p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Do you prefer the estimate of the ATE reported in part (a) or part (b)? Why?</li>
+</ol>
+<p><strong>I prefer the estimate of the ATE reported in part b versus part a, because we are adding covariates that logically make sense that they would have an impact on the response variable - that is, the vomiting of a subject on day 14 would be impacted by other features than just if she took ZMapp. For instance, if she was vomitting in Day 0, i.e. indicating illness, it could have a direct effect (without treatment) that she would still be sick and vomitting on day 14. Further, another indicator of illness would be temperature pointing to a fever, which would also play into whether one is vomiting on day 14. Further, our adjusted R-squared seems to have increased as well indicating a better fit model. </strong></p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>The regression from part (b) suggests that temperature is highly predictive of vomiting. Also include temperature on day 14 as a covariate in the regression from part (b) and report the ATE, the standard error, and the p-value.</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$vomiting_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + dt$temperature_day0 + dt$temperature_day14, data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$vomiting_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + 
+##     dt$temperature_day0 + dt$temperature_day14, data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.87745 -0.27436  0.04701  0.24801  0.66445 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept)          -22.59159    7.47727  -3.021  0.00323 **
+## dt$treat_zmapp        -0.12010    0.07768  -1.546  0.12541   
+## dt$vomiting_day0       0.04604    0.14426   0.319  0.75033   
+## dt$temperature_day0    0.17664    0.07642   2.312  0.02296 * 
+## dt$temperature_day14   0.06015    0.02937   2.048  0.04335 * 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3609 on 95 degrees of freedom
+## Multiple R-squared:  0.3402, Adjusted R-squared:  0.3124 
+## F-statistic: 12.24 on 4 and 95 DF,  p-value: 4.545e-08</code></pre>
+<p><strong>The estimated treatment effect of ZMapp on whether someone was vomiting on day 14 with this expanded model was -0.12010 (SE is 0.07768). The P-value associated with this esimate is .12541, which is not signficant. </strong></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Do you prefer the estimate of the ATE reported in part (b) or part (d)? Why?</li>
+</ol>
+<p><strong>Were I a greedy fishing scientist, I would prefer the estimate of the ATE reported in part b, becauase the results indicated a statistically signficant treatment effect; however, as a dispassionate and emperically-minded scientist, I prefer the estimate of the ATE in part d, because it presents a more complete model (The Adjusted R-squared increased a bit), and as we discussed above, temperature on day 14 makes logical sense that it might be an indicator of illness yielding vomitting on day 14. Consqeuently, even though we lose our statistically significant coefficent, I believe it presents a more robust model and picture of what is going on. </strong></p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Now let’s switch from the outcome of vomiting to the outcome of temperature, and use the same regression covariates as in part (b). Test the hypothesis that ZMapp is especially likely to reduce men’s temperatures, as compared to women’s, and describe how you did so. What do the results suggest?</li>
+</ol>
+<pre class="r"><code>fit &lt;- lm(dt$temperature_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + dt$temperature_day0 +factor(dt$male), data=dt)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dt$temperature_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + 
+##     dt$temperature_day0 + factor(dt$male), data = dt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.38138 -0.50233  0.08585  0.50550  1.26462 
+## 
+## Coefficients:
+##                     Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          35.9694    13.7118   2.623   0.0101 *  
+## dt$treat_zmapp       -1.0179     0.1401  -7.266 1.03e-10 ***
+## dt$vomiting_day0     -0.1393     0.2705  -0.515   0.6078    
+## dt$temperature_day0   0.6383     0.1406   4.538 1.66e-05 ***
+## factor(dt$male)1      2.1796     0.1415  15.402  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.674 on 95 degrees of freedom
+## Multiple R-squared:  0.7883, Adjusted R-squared:  0.7794 
+## F-statistic: 88.44 on 4 and 95 DF,  p-value: &lt; 2.2e-16</code></pre>
+<ol start="7" style="list-style-type: lower-alpha">
+<li>Suppose that you had not run the regression in part (f). Instead, you speak with a colleague to learn about heterogenous treatment effects. This colleague has access to a non-anonymized version of the same dataset and reports that he had looked at heterogenous effects of the ZMapp treatment by each of 10,000 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 2,000 different indicators of health, for 20,000,000 different regressions in total. Across these 20,000,000 regressions your colleague ran, the treatment’s interaction with gender on the outcome of temperature is the only heterogenous treatment effect that he found to be statistically significant. He reasons that this shows the importance of gender for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering his confidence, after looking at the data, he also returned to his medical textbooks and built a theory about why ZMapp interacts with processes only present in men to cure. Another doctor, unfamiliar with the data, hears his theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)</li>
+</ol>
+<p><strong>A large issue of mine is that we don’t know how the sample was selected - whether it was a randomized trial or whether it was given to select individuals, such as US military personnel. Just like the HIE from the Mastering ’Metrics book which had treatment groups associated with each plan were mostly too small for comparisons between them to be statistically meaningful, an additional concern of mine is that we are dealing with a sample of 100 individuals, which, in the scheme of things, is not that large. Gerber and Green mention that when we compare treatment affects across different subgroups and settings, we have to ensure that our interpretation is done in a rigerous manner so it is not impacated by things like sampling variability, which is my concern. I also take issue with his logic-by-deduction - that because the only heterogenous treatment effect that was statistically signficant was gender, then it <em>must</em> be gender</strong></p>
+<pre class="r"><code>dt[,.N,by=list(male, treat_zmapp)]</code></pre>
+<pre><code>##    male treat_zmapp  N
+## 1:    0           0 40
+## 2:    1           1 18
+## 3:    0           1 23
+## 4:    1           0 19</code></pre>
+<p><strong>Even when our sample size is 100, I am even more worried about the sample of this study and in particular, the distribution of subjects - 63/100 were women, where 23 of the 63 got the ZMapp treatment, and only 37 of the subjects were men, where 18 got the treatment. My gut and intuition tells me that these groupings are too small for us to comfortably draw such conclusions. </strong></p>
+<p><strong>Perhaps were we to develop and pre-specify the investigating of conditional average treatment effects for these two subgroups, I would be more inclined to support the small sample sizes, but this retrospective look makes this seem potentially brash to consider post-hoc.</strong></p>
+<p><strong>Finally, I feel like we are on a grand fishing expedition. Just like Gerber and Green mention on page 300, we are in for a multiple comparisons problem where if we have enough subgroups, odds are good that statistically signficant interactions with at least one covariate (!) will pop up merely by chance, and this is potentially what we’re observing. </strong></p>
+<ol start="8" style="list-style-type: lower-alpha">
+<li>Now, imagine that what described in part (g) did not happen, but that you had tested this heterogeneous treatment effect, and only this heterogeneous treatment effect, of your own accord. Would you be more or less inclined to believe that the heterogeneous treatment effect really exists? Why?</li>
+</ol>
+<p><strong>I feel like my concerns from above still hold; that our sample size is too small to draw such a conclusion about the heterogeneous treatment effect and we should have developed a CATE protocol prior to running the study if we assumed as such. This being said, I feel like I would be less concerned about the multiple comparisons problem though.</strong></p>
+<ol style="list-style-type: lower-roman">
+<li>Another colleague proposes that being of African descent causes one to be more likely to get Ebola. He asks you what ideal experiment would answer this question. What would you tell him? (<em>Hint: refer to Chapter 1 of Mostly Harmless Econometrics.</em>)</li>
+</ol>
+<p><strong>An ideal experiment would consist of blocking based upon ethnic heritage, including a block of individuals that were of African descent. But as Gerber and Green point out at the bottom of page 301, a more fundamental limitation of subgroup analysis is that it is essentially non-experimental in character. It could be that being of African descent is merely a marker for other factors. The fact of being of African descent may predict the size of the treatment effect, but testing/blocking on descent may not cause an change in the size of the conditional average treatment effect. </strong></p>
 </div>
 
 
