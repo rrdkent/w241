@@ -204,13 +204,17 @@ a. In Column 3 of Table 4A, what is the estimated ATE of providing a recycling b
 
 **We observe that by providing any bin, there is a statistically signfiicant increase in estimated ATE of average weight of recyclables turned in per week of .187 kg during the six week period.  To calculate the 95% confidence interval for the estimated ATE, we take the estimated ATE coefficent +/- two standard errors. That is:**
 
-$0.187 \pm 1.96*(0.032) = $ **-0.12428 to 0.24972**
+$0.187 \pm 1.96*(0.032)$ 
+
+**= -0.12428 to 0.24972**
 
 b. In Column 3 of Table 4A, what is the estimated ATE of sending a text message reminder on the average weight of recyclables turned in per household per week?  Provide a 95% confidence interval.
 
 **We observe that any SMS message results in a non-statistically signficant decrease in estimated ATE of average weight of recyclables turned in per week of .024 (i.e. a -.024 gain) kg during the six week period. To calculate the 95% confidence interval for the estimated ATE, we take the estimated ATE coefficent +/- two standard errors. That is:**
 
-$-0.024 \pm 1.96*(0.039) = $ **-.10044 to .05244**
+$-0.024 \pm 1.96*(0.039)$ 
+
+**= -.10044 to .05244**
 
 c. Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of providing a recycling bin?
 
@@ -226,7 +230,9 @@ e. Suppose that, during the two weeks before treatment, household A turns in 2kg
 
 f. Suppose that the variable "percentage of visits turned in bag, baseline" had been left out of the regression reported in Column 1.  What would you expect to happen to the results on providing a recycling bin?  Would you expect an increase or decrease in the estimated ATE?  Would you expect an increase or decrease in the standard error?  Explain your reasoning.
 
-**In column one, the variable "percentage of visits turne din bag, baseline was the highest magnitude coefficent.  I believe this means that if we turn the SMS variable (i.e. no SMS), the has cellphone (i.e. doesn't have a cellphone), and any bin(i.e. no bin) off, our baseline would be that .374 percent of visits to households resulted in the turning in of a bag.  Because this is a higher magnitude than the other variables, I believe we can deduce that this is the key driver in the estimated ATE.  If it was left out, I would suspect that some of the magnitude would be distributed proportionally to the other included variables though the overall estimated ATE would go down because we don't have as precise a model to estimate ATE.  I would also expect the Standard Error to increase because our pecision with which the regression coeffcient is esimated would be reduced.  That is, our less precise esimate of the coefficent would result in a higher SE because a major input of the response variable yielding a more precise model is removed. **
+**In column one, the variable "percentage of visits turned in bag, baseline" was the highest magnitude coefficent.  I believe this means that if we turn the SMS variable (i.e. no SMS), the has cellphone (i.e. doesn't have a cellphone), and any bin(i.e. no bin) off, our baseline would be that .374 percent of visits to households resulted in the turning in of a bag.  **
+
+**Because this is a higher magnitude than the other variables, I believe we can deduce that this is the key driver in the estimated ATE.  If it was left out, I would suspect that some of the magnitude would be distributed proportionally to the other included variables though the overall estimated ATE would go down because we don't have as precise a model to estimate ATE.  I would also expect the Standard Error to increase because our pecision with which the regression coeffcient is esimated would be reduced.  That is, our less precise esimate of the coefficent would result in a higher SE because a major input of the response variable yielding a more precise model is removed.**
 
 g. In column 1 of Table 4A, would you say the variable "has cell phone" is a bad control?  Explain your reasoning.
 
@@ -240,6 +246,7 @@ h. If we were to remove the "has cell phone" variable from the regression, what 
 Staying with the same experiment, now lets think about multifactor experiments. 
 
 a. What is the full experimental design for this experiment?  Tell us the dimensions, such as 2x2x3.  (Hint: the full results appear in Panel 4B.)
+
 **Bin without sticker, bin with a sticker, (didn't recieve a bin); got an generic SMS message, got a personal SMS message, (didn't get an SMS message) and *grumble* Has a Cell phone, (Doesn't have a cell phone). Consequently the dimensions are 3x3x2, one dimension regarding the bin/sticker, one regarding the SMS message, and one for the cell phone.**
 
 b. In the results of Table 4B, describe the baseline category. That is, in English, how would you describe the attributes of the group of people for whom all dummy variables are equal to zero?
@@ -260,6 +267,8 @@ e. Is this difference you just described statistically significant?  Explain whi
 
 $.055 \pm 1.96*(0.015)$ Conf int: .0256 and .0844
 $.035 \pm 1.96*(0.015)$ Conf int: .0056 and .0644 --> Overlap between .0256 and .0644.
+
+**These intevals overlap.**
 
 **Consequently, because of the standard error and the coefficent, we know that this difference is likely not statistically signficant.**
 
@@ -294,7 +303,7 @@ summary(dt)
 ```{r}
 hist(dt$street)
 ```
-**Additionally, we see some values in Street with -999.  I am going to drop these as well for similar reasons as to the NA.**
+**Additionally, we see some values in Street with -999.  I am going to drop these as well for similar reasons as to the NA.  I'm concerned about the veracity and robustness of the data.  If this means something like the investigators couldn't track down the address, or if there wasn't an address, this could lead to other issues that aren't self-evident in the data.  I'd recommend exploring this group further, but for the purposes of this analysis, I am going to omit them.**
 
 **Everything else, generally, looks ok.**
 
@@ -468,11 +477,13 @@ fit <- lm(dt$temperature_day14 ~ dt$treat_zmapp + dt$vomiting_day0 + dt$temperat
 summary(fit)
 ```
 
-**I regressed the day 14 temperature on the treatment of ZMapp, vomiting indictor on day 0, the temeprature on day 0, whether the subject was male and the interaction of the treatment of ZMapp and whether the individual was a male.  The results indicate that there is a statistically signficant difference of the treatment effect on a male associated with a coefficent of 3.09 and a p-value of 2*10^(-16), which is super-signficant along with the interaction term of -2.08 with the same p-value.  As I understand it, if we flip on the coefficent associated with treatment of ZMapp (-1.02) and off vomiting day 0, off temperature day 0, on male (1), and on the interaction of treatment and male then the result is a coefficent of (-.23087+3.08549+-2.07669) or a sum of .78, so that the temperature of a man is .78 greater than that of a woman.  Therefore our results suggest that we cannot accept that ZMapp is especially likely to reduce men's temperatures, relative to women's which would just be ZMapp treatment turned on (-.23). **
+**I regressed the day 14 temperature on the treatment of ZMapp, vomiting indictor on day 0, the temeprature on day 0, whether the subject was male and the interaction of the treatment of ZMapp and whether the individual was a male.  The results indicate that there is a statistically signficant difference of the treatment effect on a male associated with a coefficent of 3.09 and a p-value of 2x10^(-16), which is super-signficant along with the interaction term of -2.08 with the same p-value.**
 
-g. Suppose that you had not run the regression in part (f). Instead, you speak with a colleague to learn about heterogenous treatment effects. This colleague has access to a non-anonymized version of the same dataset and reports that he had looked at heterogenous effects of the ZMapp treatment by each of 10,000 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 2,000 different indicators of health, for 20,000,000 different regressions in total. Across these 20,000,000 regressions your colleague ran, the treatment's interaction with gender on the outcome of temperature is the only heterogenous treatment effect that he found to be statistically significant. He reasons that this shows the importance of gender for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering his confidence, after looking at the data, he also returned to his medical textbooks and built a theory about why ZMapp interacts with processes only present in men to cure. Another doctor, unfamiliar with the data, hears his theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)
+**As I understand it, if we flip on the coefficent associated with treatment of ZMapp (-1.02) and off vomiting day 0, off temperature day 0, on male (1), and on the interaction of treatment and male then the result is a coefficent of (-.23087+3.08549+-2.07669) or a sum of .78, so that the temperature of a man is .78 greater than that of a woman.  Therefore our results suggest that we cannot accept that ZMapp is especially likely to reduce men's temperatures, relative to women's which would just be ZMapp treatment turned on (-.23). **
 
-**A large issue of mine is that we don't know how the sample was selected - whether it was a randomized trial or whether it was given to select individuals, such as US military personnel.  Just like the HIE from the Mastering 'Metrics book which had treatment groups associated with each plan were mostly too small for comparisons between them to be statistically meaningful, an additional concern of mine is that we are dealing with a sample of 100 individuals, which, in the scheme of things, is not that large.  Gerber and Green mention that when we compare treatment affects across different subgroups and settings, we have to ensure that our interpretation is done in a rigerous manner so it is not impacated by things like sampling variability, which is my concern.  I also take issue with his logic-by-deduction - that because the only heterogenous treatment effect that was statistically signficant was gender, then it *must* be gender**
+g. Suppose that you had not run the regression in part (f). Instead, you speak with a colleague to learn about heterogeneous treatment effects. This colleague has access to a non-anonymized version of the same dataset and reports that he had looked at heterogeneous effects of the ZMapp treatment by each of 10,000 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 2,000 different indicators of health, for 20,000,000 different regressions in total. Across these 20,000,000 regressions your colleague ran, the treatment's interaction with gender on the outcome of temperature is the only heterogeneous treatment effect that he found to be statistically significant. He reasons that this shows the importance of gender for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering his confidence, after looking at the data, he also returned to his medical textbooks and built a theory about why ZMapp interacts with processes only present in men to cure. Another doctor, unfamiliar with the data, hears his theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)
+
+**A large issue of mine is that we don't know how the sample was selected - whether it was a randomized trial or whether it was given to select individuals, such as US military personnel.  Just like the HIE from the Mastering Metrics book which had treatment groups associated with each plan were mostly too small for comparisons between them to be statistically meaningful, an additional concern of mine is that we are dealing with a sample of 100 individuals, which, in the scheme of things, is not that large.  Gerber and Green mention that when we compare treatment affects across different subgroups and settings, we have to ensure that our interpretation is done in a rigerous manner so it is not impacated by things like sampling variability, which is my concern.  I also take issue with his logic-by-deduction - that because the only heterogenous treatment effect that was statistically signficant was gender, then it *must* be gender**
 
 ```{r}
 dt[,.N,by=list(male, treat_zmapp)]
