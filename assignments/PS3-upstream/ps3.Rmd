@@ -246,9 +246,11 @@ c. In column (1) of Table 4B, interpret the magnitude of the coefficient on "bin
 
 d. In column (1) of Table 4B, which seems to have a stronger treatment effect, the recycling bin with message sticker, or the recycling bin without sticker?  How large is the magnitude of the estimated difference?
 
-**Observing the coefficents associated with the different treatmetns of "bin with sticker" and "bin without sticker" with respect to the percengae of visits where households turned in a bag, we observe that bin with sticker has a statistically signficant effect at the 1% level of .055 with a SE of .015, whereas the bin without a sticker has as statistically significant effect of .035 with an SE also of .015 at the 5% level.**
+**Observing the coefficents associated with the different treatmetns of "bin with sticker" and "bin without sticker" with respect to the percengae of visits where households turned in a bag, we observe that bin with sticker has a stronger treatment effect with a statistically signficant effect at the 1% level of .055 with a SE of .015, whereas the bin without a sticker has as statistically significant effect of .035 with an SE also of .015 at the 5% level.  The magnitude is the difference in ATEs since there is no interaciton term, so the magnitude difference is .02.**
 
 e. Is this difference you just described statistically significant?  Explain which piece of information in the table allows you to answer this question.
+
+
 
 f. Notice that Table 4C is described as results from "fully saturated" models.  What does this mean?  Looking at the list of variables in the table, explain in what sense the model is "saturated."
 
@@ -393,7 +395,7 @@ summary(fit)
 
 $.130793 \pm 1.96 * .026975$
 
-**Our 95% confidence interval is between 0.077922 and 0.183664, a distance of .105742**
+**Our 95% confidence interval is between 0.077922 and 0.183664, a distance of .105742.  I believe this model differes because we are breaking out the discerete treatments by their type (generic versus personal SMS, bin sticker versus bin no-sticker), which together yield more context and specific data regarding different outcomes.  Consequently this estimate will have a higher accuracy than the other model.  **
 
 # 5 A Final Practice Problem 
 Now for a fictional scenario. An emergency two-week randomized controlled trial of the experimental drug ZMapp is conducted to treat Ebola. (The control represents the usual standard of care for patients identified with Ebola, while the treatment is the usual standard of care plus the drug.) 
@@ -457,7 +459,7 @@ summary(fit)
 
 g. Suppose that you had not run the regression in part (f). Instead, you speak with a colleague to learn about heterogenous treatment effects. This colleague has access to a non-anonymized version of the same dataset and reports that he had looked at heterogenous effects of the ZMapp treatment by each of 10,000 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 2,000 different indicators of health, for 20,000,000 different regressions in total. Across these 20,000,000 regressions your colleague ran, the treatment's interaction with gender on the outcome of temperature is the only heterogenous treatment effect that he found to be statistically significant. He reasons that this shows the importance of gender for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering his confidence, after looking at the data, he also returned to his medical textbooks and built a theory about why ZMapp interacts with processes only present in men to cure. Another doctor, unfamiliar with the data, hears his theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)
 
-**A large issue of mine is that we don't know how the sample was selected - whether it was a randomized trial or whether it was given to select individuals, such as US military personnel.  Just like the HIE from the Mastering 'Metrics book which had treatment groups associated with each plan were mostly too small for comparisons between them to be statistically meaningful, an additional concern of mine is that we are dealing with a sample of 100 individuals, which, in the scheme of things, is not that large.  Gerber and Green mention that when we compare treatment affects across different subgroups and settings, we have to ensure that our interpretation is done in a rigerous manner so it is not impacated by things like sampling variability, which is my concern.  I also take issue with his logic-by-deduction - that because the only heterogenous treatment effect that was statistically signficant was gender, then it *must* be gender.**
+**A large issue of mine is that we don't know how the sample was selected - whether it was a randomized trial or whether it was given to select individuals, such as US military personnel.  Just like the HIE from the Mastering 'Metrics book which had treatment groups associated with each plan were mostly too small for comparisons between them to be statistically meaningful, an additional concern of mine is that we are dealing with a sample of 100 individuals, which, in the scheme of things, is not that large.  Gerber and Green mention that when we compare treatment affects across different subgroups and settings, we have to ensure that our interpretation is done in a rigerous manner so it is not impacated by things like sampling variability, which is my concern.  I also take issue with his logic-by-deduction - that because the only heterogenous treatment effect that was statistically signficant was gender, then it *must* be gender**
 
 ```{r}
 dt[,.N,by=list(male, treat_zmapp)]
@@ -466,10 +468,12 @@ dt[,.N,by=list(male, treat_zmapp)]
 
 **Perhaps were we to develop and pre-specify the investigating of conditional average treatment effects for these two subgroups, I would be more inclined to support the small sample sizes, but this retrospective look makes this seem potentially brash to consider post-hoc.**
 
+**Finally, I feel like we are on a grand fishing expedition.  Just like Gerber and Green mention on page 300, we are in for a multiple comparisons problem where if we have enough subgroups, odds are good that statistically signficant interactions with at least one covariate (!) will pop up merely by chance, and this is potentially what we're observing.   **
+
 h. Now, imagine that what described in part (g) did not happen, but that you had tested this heterogeneous treatment effect, and only this heterogeneous treatment effect, of your own accord. Would you be more or less inclined to believe that the heterogeneous treatment effect really exists? Why?
 
-**I feel like my concerns from above still hold; that our sample size is too small to draw such a conclusion about the heterogeneous treatment effect and we should have developed a CATE protocol prior to running the study if we assumed as such.  **
+**I feel like my concerns from above still hold; that our sample size is too small to draw such a conclusion about the heterogeneous treatment effect and we should have developed a CATE protocol prior to running the study if we assumed as such.  This being said, I feel like I would be less concerned about the multiple comparisons problem though.**
 
 i. Another colleague proposes that being of African descent causes one to be more likely to get Ebola. He asks you what ideal experiment would answer this question. What would you tell him?  (*Hint: refer to Chapter 1 of Mostly Harmless Econometrics.*)
 
-**An ideal experiment would consist of blocking based upon ethnic heritage, including a block of individuals that were of African descent.   **
+**An ideal experiment would consist of blocking based upon ethnic heritage, including a block of individuals that were of African descent.  But as Gerber and Green point out at the bottom of page 301, a more fundamental limitation of subgroup analysis  is that it is essentially non-experimental in character.  It could be that being of African descent is merely a marker for other factors.  The fact of being of African descent may predict the size of the treatment effect, but testing/blocking on descent may not cause an change in the size of the conditional average treatment effect. **
