@@ -8,40 +8,81 @@ output:
   pdf_document: default
 ---
 
-<!--
-Some guidelines for submitting problem sets in this course:
-
-- Please submit a PDF document rather than a Word document or a Google document.
-- Please put your name at the top of your problem set.
-- Please **bold** or *highlight* your numerical answers to make them easier to find.
-- If you'll be using `R` or `Python` code to calculate your answers, please put the code and its output directly into your Problem Set PDF document.
-- It is highly recommended, although not required, that you use the RMarkdown feature in RStudio to compose your problem set answers. RMarkdown allows you to easily intermingle analysis code and answers in one document. It is of a similar design as `jupyter` and an ipython notebook.
-- You do not need to show work for trivial calculations, but showing work is always allowed.
-- For answers that involve a narrative response, please feel free to describe the key concept directly and briefly, if you can do so, and do not feel pressure to go on at length.
-- Please ask us questions about the problem set if you get stuck. **Don't spend more than 20 minutes puzzling over what a problem means.** 
-- Please ensure that someone (us!) can compile your solution set. The best way is to use the web-hosted links we've provided. 
--->
-
 ```{r}
 # load packages 
 library(foreign)
+library(data.table)
 ```
 
 # 1. Potential Outcomes 
 a. Make up a hypothetical schedule of potential outcomes for three Compliers and three Never-Takers where the ATE is positive but the CACE is negative. By ATE, we mean the average treatment effect for the entire population, including both compliers and never-takers.  Note that we can never compute this ATE directly in practice, because we never observe both potential outcomes for any individual, especially for never-takers. That's why this question requires you to provide a complete table of hypothetical potential outcomes for all six subjects.
 
+
+
 b. Suppose that an experiment were conducted on your pool of subjects. In what ways would the estimated CACE be informative or misleading? 
 
 c. Which population is more relevant to study for future decision making: the set of Compliers, or the set of Compliers plus Never-Takers? Why?
 
-# Turnout to Vote 
+# 2. Turnout to Vote 
 Suppose that a researcher hires a group of canvassers to contact a set of 1,000 voters randomly assigned to a treatment group. When the canvassing effort concludes, the canvassers report that they successfully contacted 500 voters in the treatment group, but the truth is that they only contacted 250. When voter turnout rates are tabulated for the treatment and control groups, it turns out that 400 of the 1,000 subjects in the treatment group voted, as compared to 700 of the 2,000 subjects in the control group (none of whom were contacted). 
+
+Treatment:
+
+n = 1000
+contact_false = 500
+alpha_false = 500/1000 = .5
+
+contact_true = 250
+alpha_true = 250/100 = .25
+
+Voters = 400
+Conversion = 400/1000 = .4
+
+Control:
+
+n = 2000
+Voters = 700
+Conversion = 700/2000 = .35
+
 
 a. If you believed that 500 subjects were actually contacted, what would your estimate of the CACE be? 
 
+Treatment = 400/1000 #Can I gross this up to 2000?
+
+Control = 700/2000
+
+alpha = .5
+
+Difference of 400/1000 - 700/2000 driven by the 50% of the units.  I.e. effect of 0 driven by the other 50% that don't comply.  
+
+T-C = ATE = $\alpha$(TD = 1-CD = 1) + (1-$\alpha$)(TD=0-CD=0)
+```{r}
+ate_false = .5*(.4) + (1-.5)*(.35)
+ate_false
+```
+
+```{r}
+cace_false = ate_false/.5
+cace_false
+```
+i.e. the actual difference is (1/alpha i.e. 2) times as big.
+
+
 b. Suppose you learned that only 250 subjects were actually treated. What would your estimate of the CACE be? 
+```{r}
+ate_true = .25*(.4) + (1-.25)*(.35)
+ate_true
+```
+
+```{r}
+cace_true = ate_true/.25
+cace_true
+```
+i.e. the actual difference is (1/alpha i.e. 4) times as big.
 
 c. Do the canvassers' exaggerated reports make their efforts seem more or less effective? Define effectiveness either in terms of the ITT or CACE. Why does the definition matter? 
+
+
 
 # 3. Turnout in Dorms
 Guan and Green report the results of a canvassing experiment conduced in Beijing on the eve of a local election. Students on the campus of Peking University were randomly assigned to treatment or control groups. Canvassers attempted to contact students in their dorm rooms and encourage them to vote. No contact with the control group was attempted. Of the 2,688 students assigned to the treatment group, 2,380 were contacted. A total of 2,152 students in the treatment group voted; of the 1,334 students assigned to the control group, 892 voted. One aspect of this experiment threatens to violate the exclusion restriction. At every dorm room they visited, even those where no one answered, canvassers left a leaflet encouraging students to vote. 
@@ -55,8 +96,46 @@ head(d)
 a. Using the data set from the book's website, estimate the ITT. First, estimate the ITT using the difference in two-group means. Then, estimate the ITT using a linear regression on the appropriate subset of data. *Heads up: There are two NAs in the data frame. Just na.omit to remove these rows.*
 
 ```{r}
-
+dt <- data.table(d)
 ```
+
+```{r}
+dt[,.(Total = sum(.N)),]
+```
+
+```{r}
+dt <- na.omit(dt)
+dt[,.(Total = sum(.N)),]
+```
+
+**First, the Difference in group means**
+
+**We recall that ITT is synonomous for ATE, which is $\alpha$(TD=1-CD=1)**
+
+```{r}
+alpha <- dt[treat2==1,(mean=mean(contact)),]
+alpha
+```
+
+```{r}
+dt[which(treat2==1),.N,]
+```
+
+
+```{r}
+ITT <- alpha*((dt[which(treat2==1 & turnout==1),.N,]/dt[which(treat2==1),.N,])-(dt[which(treat2==0 & turnout==1),.N,]/dt[which(treat2==0),.N,]))
+ITT
+```
+**The ITT calculated by difference in group means is .117**
+
+**Now for the Regression:**
+
+```{r}
+fit <- lm(dt$turnout ~ dt$treat2, data=dt )
+summary(fit)
+```
+
+
 
 b. Use randomization inference to test the sharp null hypothesis that the ITT is zero for all observations, taking into account the fact that random assignment was clustered by dorm room. Interpret your results. 
 
